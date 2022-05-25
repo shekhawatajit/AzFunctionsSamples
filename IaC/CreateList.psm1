@@ -44,7 +44,10 @@ function New-RequestList {
     if (! $Fld3) {
         $Fld3 = Add-PnPFieldFromXml -List $List -FieldXml "<Field Type='UserMulti' DisplayName='Visitors' List='UserInfo' Required='FALSE' EnforceUniqueValues='FALSE' ShowField='ImnName' UserSelectionMode='PeopleAndGroups' UserSelectionScope='0' Mult='TRUE' Sortable='FALSE' ID='{1a3dfe68-d2aa-483f-b96c-5eef95cb0982}' StaticName='Visitors' Name='Visitors' Description='Visitors of this project site and group.'/>"
     }
-
+    $Fld4 = Get-PnPField -List $ListTitle -Identity 'Description' -ErrorAction SilentlyContinue
+    if (! $Fld4) {
+        $Fld4 = Add-PnPFieldFromXml -List $List -FieldXml "<Field Type='Note' DisplayName='Description' Required='FALSE' EnforceUniqueValues='FALSE' Indexed='FALSE' NumLines='6' RichText='FALSE' RichTextMode='Compatible' IsolateStyles='FALSE' Sortable='FALSE' ID='{c86c4ad5-0d6b-437d-8dfa-d61b6bead418}' StaticName='Description' Name='Description' Description='Project Description' RestrictedMode='TRUE' AppendOnly='FALSE'/>"
+    }
     # rename Title field
     $Fld = Set-PnPField -List $List -Identity "Title" -Values @{Title = "Project Title"; Description='Title of the project, a SharePoint site will be created using this title.'}
 
