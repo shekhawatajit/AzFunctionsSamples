@@ -21,37 +21,37 @@ function New-RequestList {
     Install-Module PnP.PowerShell -Scope CurrentUser -Force
     
     Write-Information "Creating request list in Hub site if does not exist."
-    $ListTitle = "OIP Request"
-    $ListDescription = "List for requesting new OIP Site."
+    $ListTitle = "Project Request"
+    $ListDescription = "List for requesting new Project Site."
     #Connecting to site
-    Connect-PnPOnline -Url $GovernanceSiteUrl -ClientId $ClientID -Tenant $TenantID -CertificateBase64Encoded $Secret
+    Connect-PnPOnline -Url $HubSiteUrl -ClientId $ClientID -Tenant $TenantID -CertificateBase64Encoded $Secret
     
     # Creating list
     $List = Get-PnPList -Identity $ListTitle -ErrorAction SilentlyContinue
     if (! $List) {
-        $List = New-PnPList -Title $ListTitle -Url "lists/OIPRequest" -Template GenericList -EnableVersioning -OnQuickLaunch:$false
+        $List = New-PnPList -Title $ListTitle -Url "lists/ProjectRequest" -Template GenericList -EnableVersioning -OnQuickLaunch:$false
         $UpdatedList = Set-PnPList -Identity $ListTitle -Description $ListDescription 
     }
     # Creating fields if does not exist
-    $Fld1 = Get-PnPField -List $ListTitle -Identity 'LibraryTitle' -ErrorAction SilentlyContinue
+    $Fld1 = Get-PnPField -List $ListTitle -Identity 'Owners' -ErrorAction SilentlyContinue
     if (! $Fld1) {
-        $Fld1 = Add-PnPFieldFromXml -List $List -FieldXml "<Field Type='Text' DisplayName='Library/List Title' Required='TRUE' MaxLength='255' ID='{63e74288-d95c-4569-8461-6e2b5aa8e0fe}' Name='LibraryTitle' Description='Title of SharePoint List or Library where policy will be enforced.'/>"
+        $Fld1 = Add-PnPFieldFromXml -List $List -FieldXml "<Field Type='UserMulti' DisplayName='Owners' List='UserInfo' Required='TRUE' EnforceUniqueValues='FALSE' ShowField='ImnName' UserSelectionMode='PeopleAndGroups' UserSelectionScope='0' Mult='TRUE' Sortable='FALSE' ID='{51d3d5ca-08d5-4248-a65e-65889da08cb3}' StaticName='Owners' Name='Owners' Description='Owners of this project site and group.'/>"
     }
-    $Fld2 = Get-PnPField -List $ListTitle -Identity 'Policy' -ErrorAction SilentlyContinue
+    $Fld2 = Get-PnPField -List $ListTitle -Identity 'Members' -ErrorAction SilentlyContinue
     if (! $Fld2) {
-        $Fld2 = Add-PnPFieldFromXml -List $List -FieldXml "<Field Name='Policy' Type='Choice' DisplayName='Policy Name' Description='Name of policy which will be enforced.' Required='TRUE' Format='Dropdown' FillInChoice='FALSE' ID='{4e992580-6539-41c4-8830-f5b002741e90}' ><Default>ContentOwnership</Default><CHOICES><CHOICE>ContentOwnership</CHOICE><CHOICE>ContentValidity</CHOICE><CHOICE>ContentArchaival</CHOICE><CHOICE>ContentDelete</CHOICE></CHOICES></Field>"
+        $Fld2 = Add-PnPFieldFromXml -List $List -FieldXml "<Field Type='UserMulti' DisplayName='Members' List='UserInfo' Required='FALSE' EnforceUniqueValues='FALSE' ShowField='ImnName' UserSelectionMode='PeopleAndGroups' UserSelectionScope='0' Mult='TRUE' Sortable='FALSE' ID='{aa2dfe68-d2aa-483f-b96c-5eef95cb0982}' StaticName='Members' Name='Members' Description='Members of this project site and group.'/>"
     }
-    $Fld3 = Get-PnPField -List $ListTitle -Identity 'FieldDefinitions' -ErrorAction SilentlyContinue
+    $Fld3 = Get-PnPField -List $ListTitle -Identity 'Visitors' -ErrorAction SilentlyContinue
     if (! $Fld3) {
-        $Fld3 = Add-PnPFieldFromXml -List $List -FieldXml "<Field Type='Note' DisplayName='Field Definitions' Required='FALSE' NumLines='6' RichText='FALSE' ID='{eeb4c696-2f1f-4a8b-ae42-38b49d6d0493}' Name='FieldDefinitions' RichTextMode='Compatible' Description='XML Schema of fields which will be added in List/Library. These field will be added by enable policy enforcement.' />"
+        $Fld3 = Add-PnPFieldFromXml -List $List -FieldXml "<Field Type='UserMulti' DisplayName='Visitors' List='UserInfo' Required='FALSE' EnforceUniqueValues='FALSE' ShowField='ImnName' UserSelectionMode='PeopleAndGroups' UserSelectionScope='0' Mult='TRUE' Sortable='FALSE' ID='{1a3dfe68-d2aa-483f-b96c-5eef95cb0982}' StaticName='Visitors' Name='Visitors' Description='Visitors of this project site and group.'/>"
     }
 
     # rename Title field
-    $Fld = Set-PnPField -List $List -Identity "Title" -Values @{Title = "Site Url"; Description='SharePoint site URL where policy will be enforced.'}
+    $Fld = Set-PnPField -List $List -Identity "Title" -Values @{Title = "Project Title"; Description='Title of the project, a SharePoint site will be created using this title.'}
 
     # updating default view
     $Views = Get-PnPView -List $List
-    $Views = Set-PnPView -List $List -Identity $Views[0].Id -Fields "Title", "Library/List Title", "Policy", "Field Definitions"
+    $Views = Set-PnPView -List $List -Identity $Views[0].Id -Fields "Title", "Owners", "Members", "Visitors"
     $RetVal = $List.Id.Guid.ToString();
     return $RetVal
 }
