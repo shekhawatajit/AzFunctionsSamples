@@ -26,7 +26,7 @@ jobs:
     - name: Get Project List
       run: |
         Import-Module ./IaC/CreateList.psm1
-        $ListId = New-RequestList -HubSiteUrl ${{env.HubSiteUrl}} -ClientID ${{secrets.CLIENTID}} -Secret ${{secrets.CLIENTSECRET}} 
+        $ListId = New-RequestList -HubSiteUrl ${{env.HubSiteUrl}} -ClientID ${{secrets.CLIENTID}} -CertificateBase64Encoded ${{secrets.CLIENTSECRET}} -Tenant ${{env.TenantID}}
         echo "::set-output name=List_Id::$ListId"
         Write-Host $ListId
       id: Get_Project_List
