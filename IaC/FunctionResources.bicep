@@ -51,14 +51,21 @@ var appServiceName = '${appNamePrefix}-appservice'
 var appInsightsName = '${appNamePrefix}-appinsights'
 var workspaceName = '${appNamePrefix}-workspace'
 var storageAccountName = format('{0}sta', replace(appNamePrefix, '-', ''))
-
+var queueName = '${appNamePrefix}-queue'
 resource storageaccount 'Microsoft.Storage/storageAccounts@2021-02-01' = {
   name: storageAccountName
   location: location
   kind: 'StorageV2'
   sku: environmentConfigurationMap[environmentType].contentGovernanceStorageAccount.sku
 }
-
+resource queueservice 'Microsoft.Storage/storageAccounts/queueServices@2021-02-01' = {
+  name: 'default'
+  parent: storageaccount
+}
+resource queue 'Microsoft.Storage/storageAccounts/queueServices/queues@2021-02-01' = {
+  name: queueName
+  parent: queueservice
+}
 resource appServicePlan 'Microsoft.Web/serverfarms@2020-12-01' = {
   name: appServiceName
   location: location
@@ -110,15 +117,15 @@ resource functionalAppSettings 'Microsoft.Web/sites/config@2021-03-01' = {
     APPLICATIONINSIGHTS_CONNECTION_STRING: appInsightsComponents.properties.ConnectionString
     AzureWebJobsStorage: 'DefaultEndpointsProtocol=https;AccountName=${storageaccount.name};AccountKey=${storageaccount.listKeys().keys[0].value};EndpointSuffix=core.windows.net'
     FUNCTIONS_EXTENSION_VERSION: '~4'
-    FUNCTIONS_WORKER_RUNTIME: 'dotnet-isolated'
-    linuxFxVersion: 'DOTNET-ISOLATED|6.0'
+    FUNCTIONS_WORKER_RUNTIME: 'dotnet'
+    linuxFxVersion: 'DOTNET|6.0'
     WEBSITE_LOAD_USER_PROFILE: 1
     
     CertificateName: 'oipdevelopment'
     ClientId: '3764eb06-7e9d-408b-83e3-2d1982ac5707'
     KeyVaultName: 'oipkv'
     TenantId: '51575b39-28de-4120-94c6-af4c743f70f1'
-    
+    QueueName: queue.name
     RequestListId: RequestListId
     HubSite: HubSite
   }
