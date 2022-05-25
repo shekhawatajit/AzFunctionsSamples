@@ -114,14 +114,12 @@ resource functionalAppSettings 'Microsoft.Web/sites/config@2021-03-01' = {
     linuxFxVersion: 'DOTNET-ISOLATED|6.0'
     WEBSITE_LOAD_USER_PROFILE: 1
     
-    CertificateName: 'content-governance'
-    ClientId: '5ffa396a-bf24-4e66-9baf-54ff99a18f97'
-    KeyVaultName: 'kv-contentgovernance'
-    TenantId: '1d063515-6cad-4195-9486-ea65df456faa'
+    CertificateName: 'oipdevelopment'
+    ClientId: '3764eb06-7e9d-408b-83e3-2d1982ac5707'
+    KeyVaultName: 'oipkv'
+    TenantId: '51575b39-28de-4120-94c6-af4c743f70f1'
     
     RequestListId: RequestListId
     HubSite: HubSite
-    LogWorkspaceId: logAnalyticsWorkspace.id
-    LogWorkspacePrimarykey: listKeys(logAnalyticsWorkspace.id, providers('Microsoft.OperationalInsights', 'workspaces').apiVersions[0]).primarySharedKey
   }
 }
