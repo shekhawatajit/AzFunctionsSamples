@@ -11,12 +11,7 @@ function New-RequestList {
     
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [String]$Secret,
-
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [String]$TenantID
-
+        [String]$Secret
     )        
     Install-Module PnP.PowerShell -Scope CurrentUser -Force
     
@@ -24,7 +19,7 @@ function New-RequestList {
     $ListTitle = "Project Request"
     $ListDescription = "List for requesting new Project Site."
     #Connecting to site
-    Connect-PnPOnline -Url $HubSiteUrl -ClientId $ClientID -Tenant $TenantID -CertificateBase64Encoded $Secret
+    Connect-PnPOnline -Url $HubSiteUrl -ClientId $ClientID -ClientSecret $Secret
     
     # Creating list
     $List = Get-PnPList -Identity $ListTitle -ErrorAction SilentlyContinue
