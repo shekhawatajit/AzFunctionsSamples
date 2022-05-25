@@ -55,4 +55,4 @@ function New-RequestList {
     $RetVal = $List.Id.Guid.ToString();
     return $RetVal
 }
-Export-ModuleMember -Function New-GovernanceList
+Export-ModuleMember -Function New-RequestList

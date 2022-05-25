@@ -1,30 +1,47 @@
-# This is a basic workflow that is manually triggered
+name: IaC Deployment
 
-name: Manual workflow
-
-# Controls when the action will run. Workflow runs when manually triggered using the UI
-# or API.
-on:
+on: 
+  push:
+    branches: [ master ]
+    paths: 'IaC/**'
   workflow_dispatch:
-    # Inputs the workflow accepts.
-    inputs:
-      name:
-        # Friendly description to be shown in the UI instead of 'name'
-        description: 'Person to greet'
-        # Default value if no value is explicitly provided
-        default: 'World'
-        # Input has to be provided for the workflow to run
-        required: true
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+env:
+    AzureResourceGroupName: 'oip'
+    ResourceGroupLocation : 'northeurope'
+    AppNamePrefix : 'oip'
+    Environment: 'nonprod'
+    AzSubscription: 'b861f44e-a700-4255-b9f2-c462bbda50ee'
+    TenantID: '51575b39-28de-4120-94c6-af4c743f70f1'
+    HubSiteUrl: 'https://onrocks.sharepoint.com/sites/RelationHubSite'
+    
 jobs:
-  # This workflow contains a single job called "greet"
-  greet:
-    # The type of runner that the job will run on
+  deployment:
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Runs a single command using the runners shell
-    - name: Send greeting
-      run: echo "Hello ${{ github.event.inputs.name }}"
+    
+    # Checkout code
+    - uses: actions/checkout@v2
+
+    - name: Get Project List
+      run: |
+        Import-Module ./IaC/CreateList.psm1
+        $ListId = New-RequestList -HubSiteUrl ${{env.HubSiteUrl}} -ClientID ${{secrets.USERNAME_DEV}} -Secret ${{secrets.PASSWORD_DEV}} -TenantID ${{env.TenantID}}
+        echo "::set-output name=List_Id::$ListId"
+        Write-Host $ListId
+      id: Get_Project_List
+      shell: pwsh
+
+    # Log into Azure
+    - uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS_DEV }}
+
+    # Deployment
+    - name: Azure CLI script
+      uses: azure/CLI@v1
+      with:
+        azcliversion: 2.36.0
+        inlineScript: |
+          az account set --subscription ${{ env.AzSubscription }}
+          az deployment sub create --name azFunction --template-file ./IaC/main.bicep --location ${{ env.ResourceGroupLocation }} --parameters resourceGroupName=${{ env.AzureResourceGroupName }} resourceGroupLocation=${{ env.ResourceGroupLocation }} environment=${{ env.Environment }} appNamePrefix=${{ env.AppNamePrefix }} HubSite=${{env.HubSiteUrl}} RequestListId=${{steps.Get_Project_List.outputs.List_Id}}
