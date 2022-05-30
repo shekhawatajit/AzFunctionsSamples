@@ -51,7 +51,9 @@ var appServiceName = '${appNamePrefix}-appservice'
 var appInsightsName = '${appNamePrefix}-appinsights'
 var workspaceName = '${appNamePrefix}-workspace'
 var storageAccountName = format('{0}sta', replace(appNamePrefix, '-', ''))
-var queueName = '${appNamePrefix}-queue'
+var step1queueName = '${appNamePrefix}-step1queue'
+var step2queueName = '${appNamePrefix}-step2queue'
+var step3queueName = '${appNamePrefix}-step3queue'
 resource storageaccount 'Microsoft.Storage/storageAccounts@2021-02-01' = {
   name: storageAccountName
   location: location
@@ -62,8 +64,16 @@ resource queueservice 'Microsoft.Storage/storageAccounts/queueServices@2021-02-0
   name: 'default'
   parent: storageaccount
 }
-resource queue 'Microsoft.Storage/storageAccounts/queueServices/queues@2021-02-01' = {
-  name: queueName
+resource step1queue 'Microsoft.Storage/storageAccounts/queueServices/queues@2021-02-01' = {
+  name: step1queueName
+  parent: queueservice
+}
+resource step2queue 'Microsoft.Storage/storageAccounts/queueServices/queues@2021-02-01' = {
+  name: step2queueName
+  parent: queueservice
+}
+resource step3queue 'Microsoft.Storage/storageAccounts/queueServices/queues@2021-02-01' = {
+  name: step3queueName
   parent: queueservice
 }
 resource appServicePlan 'Microsoft.Web/serverfarms@2020-12-01' = {
@@ -125,8 +135,13 @@ resource functionalAppSettings 'Microsoft.Web/sites/config@2021-03-01' = {
     ClientId: '3764eb06-7e9d-408b-83e3-2d1982ac5707'
     KeyVaultName: 'oipkv'
     TenantId: '51575b39-28de-4120-94c6-af4c743f70f1'
-    QueueName: queue.name
+    Step1QueueName: step1queue.name
+    Step2QueueName: step2queue.name
+    Step3QueueName: step3queue.name
+    AddMembersToTeamFrequency: '0 */5 * * * *'
+    ProvisionTeamsSiteFrequency: '0 */5 * * * *'
     RequestListId: RequestListId
     HubSite: HubSite
+
   }
 }

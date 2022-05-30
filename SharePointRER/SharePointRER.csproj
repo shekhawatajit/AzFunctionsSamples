@@ -11,6 +11,7 @@
     <PackageReference Include="Microsoft.Azure.Functions.Worker" Version="1.6.0" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="4.0.5" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Graph" Version="4.29.0" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.1.1" />
     <PackageReference Include="PnP.Core" Version="1.6.0" />
     <PackageReference Include="PnP.Core.Auth" Version="1.6.0" />

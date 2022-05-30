@@ -6,7 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 using System;
 using Microsoft.Azure.WebJobs;
 using Azure.Security.KeyVault.Certificates;
-
+using Microsoft.Graph;
 using Azure.Identity;
 
 [assembly: FunctionsStartup(typeof(Onrocks.SharePoint.Startup))]
@@ -27,6 +27,20 @@ namespace Onrocks.SharePoint
                 // And set it as default
                 options.DefaultAuthenticationProvider = authProvider;
             });
+            builder.Services.AddSingleton(option =>
+            {
+                var CredentialOptions = new TokenCredentialOptions
+                {
+                    AuthorityHost = AzureAuthorityHosts.AzurePublicCloud
+                };
+                // Certificate based Credential  singleton
+                var clientCertCredential = new ClientCertificateCredential(azureFunctionSettings!.TenantId, azureFunctionSettings!.ClientId, LoadCertificate(azureFunctionSettings), CredentialOptions);
+                var scopes = new[] { "https://graph.microsoft.com/.default" };
+
+                return new GraphServiceClient(clientCertCredential, scopes);
+            });
+
+
         }
         private static X509Certificate2 LoadCertificate(AzureFunctionSettings settings)
         {

@@ -11,14 +11,17 @@ using System;
 using Azure.Storage.Queues;
 using System.IO;
 using PnP.Core.Services;
+using Microsoft.Graph;
 namespace Onrocks.SharePoint
 {
     public class ProjectRequestAdded
     {
         private readonly IPnPContextFactory pnpContextFactory;
-        public ProjectRequestAdded(IPnPContextFactory pnpContextFactory)
+        private readonly GraphServiceClient graphClient;
+        public ProjectRequestAdded(IPnPContextFactory pnpContextFactory, GraphServiceClient graphServiceClient)
         {
             this.pnpContextFactory = pnpContextFactory;
+            this.graphClient  = graphServiceClient;
         }
 
         [FunctionName("ProjectRequestAdded")]
@@ -39,11 +42,12 @@ namespace Onrocks.SharePoint
                 {
                     ListItemId = (int)eventData["s:Envelope"]["s:Body"]["ProcessOneWayEvent"]["properties"]["ItemEventProperties"]["ListItemId"],
                     ListId = Guid.Parse((string)eventData["s:Envelope"]["s:Body"]["ProcessOneWayEvent"]["properties"]["ItemEventProperties"]["ListId"]),
-                    WebUrl = (string)eventData["s:Envelope"]["s:Body"]["ProcessOneWayEvent"]["properties"]["ItemEventProperties"]["WebUrl"]
+                    WebUrl = (string)eventData["s:Envelope"]["s:Body"]["ProcessOneWayEvent"]["properties"]["ItemEventProperties"]["WebUrl"],
+                    RequestorId = (int)eventData["s:Envelope"]["s:Body"]["ProcessOneWayEvent"]["properties"]["ItemEventProperties"]["CurrentUserId"]
                 });
 
                 string connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
-                string QueueName = Environment.GetEnvironmentVariable("QueueName");
+                string QueueName = Environment.GetEnvironmentVariable("Step1QueueName");
 
                 QueueClient theQueue = new QueueClient(connectionString, QueueName);
                 var itemInfoBytes = System.Text.Encoding.UTF8.GetBytes(jsonString);
