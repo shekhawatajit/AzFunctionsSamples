@@ -127,8 +127,8 @@ resource functionalAppSettings 'Microsoft.Web/sites/config@2021-03-01' = {
     APPLICATIONINSIGHTS_CONNECTION_STRING: appInsightsComponents.properties.ConnectionString
     AzureWebJobsStorage: 'DefaultEndpointsProtocol=https;AccountName=${storageaccount.name};AccountKey=${storageaccount.listKeys().keys[0].value};EndpointSuffix=core.windows.net'
     FUNCTIONS_EXTENSION_VERSION: '~4'
-    FUNCTIONS_WORKER_RUNTIME: 'dotnet'
-    linuxFxVersion: 'DOTNET|6.0'
+    FUNCTIONS_WORKER_RUNTIME: 'dotnet-isolated'
+    linuxFxVersion: 'DOTNET-ISOLATED|6.0'
     WEBSITE_LOAD_USER_PROFILE: 1
     
     CertificateName: 'oipdevelopment'
@@ -138,10 +138,7 @@ resource functionalAppSettings 'Microsoft.Web/sites/config@2021-03-01' = {
     Step1QueueName: step1queue.name
     Step2QueueName: step2queue.name
     Step3QueueName: step3queue.name
-    AddMembersToTeamFrequency: '0 */5 * * * *'
-    ProvisionTeamsSiteFrequency: '0 */5 * * * *'
     RequestListId: RequestListId
     HubSite: HubSite
-
   }
 }
