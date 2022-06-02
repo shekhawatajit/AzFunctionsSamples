@@ -19,11 +19,23 @@ namespace Onrocks.SharePoint
             var config = builder.GetContext().Configuration;
             var azureFunctionSettings = new AzureFunctionSettings();
             config.Bind(azureFunctionSettings);
-
+            /*            #nullable enable
+                        AzureFunctionSettings? azureFunctionSettings = null;
+                        #nullable disable
+                        // Add our global configuration instance
+                        builder.Services.AddSingleton(options =>
+                        {
+                            var config = builder.GetContext().Configuration;
+                            var azureFunctionSettings = new AzureFunctionSettings();
+                            config.Bind(azureFunctionSettings);
+                            return config;
+                        });
+                        // Add our configuration class
+                        builder.Services.AddSingleton(options => { return azureFunctionSettings!; });*/
             builder.Services.AddPnPCore(options =>
             {
                 // Configure an authentication provider with certificate (Required for app only)
-                var authProvider = options.DefaultAuthenticationProvider = new X509CertificateAuthenticationProvider(azureFunctionSettings!.ClientId, azureFunctionSettings.TenantId, LoadCertificate(azureFunctionSettings));
+                var authProvider = new X509CertificateAuthenticationProvider(azureFunctionSettings!.ClientId, azureFunctionSettings.TenantId, LoadCertificate(azureFunctionSettings));
                 // And set it as default
                 options.DefaultAuthenticationProvider = authProvider;
             });

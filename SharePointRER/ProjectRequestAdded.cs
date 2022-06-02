@@ -21,7 +21,7 @@ namespace Onrocks.SharePoint
         public ProjectRequestAdded(IPnPContextFactory pnpContextFactory, GraphServiceClient graphServiceClient)
         {
             this.pnpContextFactory = pnpContextFactory;
-            this.graphClient  = graphServiceClient;
+            this.graphClient = graphServiceClient;
         }
 
         [FunctionName("ProjectRequestAdded")]
@@ -55,9 +55,9 @@ namespace Onrocks.SharePoint
             }
             catch (System.Exception err)
             {
-                log.LogError(err.Message);
-                log.LogError(err.Source);
+                log.LogError(err.ToString());
                 responseMessage = err.Message;
+                return new BadRequestObjectResult(responseMessage);
             }
             return new OkObjectResult(responseMessage);
         }

@@ -10,7 +10,7 @@ namespace Onrocks.SharePoint
         public string? KeyVaultName { get; set; }
         public string? HubSite { get; set; }
         public Guid RequestListId { get; set; }
-        public string? QueueName { get; set; }
+        public Guid MailListId { get; set; }
         #nullable disable
     }
 }
