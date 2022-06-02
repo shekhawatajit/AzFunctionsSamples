@@ -4,6 +4,9 @@ param location string = resourceGroup().location
 @description('Guid of Request SharePoint list.')
 param RequestListId string
 
+@description('Guid of Mail SharePoint list.')
+param MailListId string
+
 @description('Prefix string to use with resources.')
 param appNamePrefix string
 
@@ -133,12 +136,13 @@ resource functionalAppSettings 'Microsoft.Web/sites/config@2021-03-01' = {
     
     CertificateName: 'oipdevelopment'
     ClientId: '3764eb06-7e9d-408b-83e3-2d1982ac5707'
+    HubSite: HubSite
     KeyVaultName: 'oipkv'
+    MailListId: MailListId
     TenantId: '51575b39-28de-4120-94c6-af4c743f70f1'
     Step1QueueName: step1queue.name
     Step2QueueName: step2queue.name
     Step3QueueName: step3queue.name
     RequestListId: RequestListId
-    HubSite: HubSite
   }
 }

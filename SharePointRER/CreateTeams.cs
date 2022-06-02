@@ -28,7 +28,7 @@ namespace Onrocks.SharePoint
         public void Run([QueueTrigger("%Step1QueueName%", Connection = "AzureWebJobsStorage")] string projectQueueItem, ILogger log)
         {
             ProjectRequestInfo info = System.Text.Json.JsonSerializer.Deserialize<ProjectRequestInfo>(projectQueueItem);
-            log.LogInformation($"Queue trigger function processed: {projectQueueItem}");
+            log.LogInformation($"Team creation process started with data: {projectQueueItem}");
             string ProjectTitle, ProjectDescription, ProjectRequestor;
             try
             {

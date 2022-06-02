@@ -23,13 +23,22 @@ jobs:
     # Checkout code
     - uses: actions/checkout@v2
 
-    - name: Get Project List
+    - name: Get Project Request List
       run: |
         Import-Module ./IaC/CreateList.psm1
         $ListId = New-RequestList -HubSiteUrl ${{env.HubSiteUrl}} -ClientID ${{secrets.CLIENTID}} -Certificate ${{secrets.CLIENTSECRET}} -TenantID ${{env.TenantID}}
         echo "::set-output name=List_Id::$ListId"
         Write-Host $ListId
       id: Get_Project_List
+      shell: pwsh
+
+    - name: Get Project Email List
+      run: |
+        Import-Module ./IaC/CreateList.psm1
+        $MailListId = New-MailList -HubSiteUrl ${{env.HubSiteUrl}} -ClientID ${{secrets.CLIENTID}} -Certificate ${{secrets.CLIENTSECRET}} -TenantID ${{env.TenantID}}
+        echo "::set-output name=MailList_Id::$MailListId"
+        Write-Host $MailListId
+      id: Get_Project_Mail_List
       shell: pwsh
 
     # Log into Azure
@@ -44,4 +53,4 @@ jobs:
         azcliversion: 2.36.0
         inlineScript: |
           az account set --subscription ${{ env.AzSubscription }}
-          az deployment sub create --name azFunction --template-file ./IaC/main.bicep --location ${{ env.ResourceGroupLocation }} --parameters resourceGroupName=${{ env.AzureResourceGroupName }} resourceGroupLocation=${{ env.ResourceGroupLocation }} environment=${{ env.Environment }} appNamePrefix=${{ env.AppNamePrefix }} HubSite=${{env.HubSiteUrl}} RequestListId=${{steps.Get_Project_List.outputs.List_Id}}
+          az deployment sub create --name azFunction --template-file ./IaC/main.bicep --location ${{ env.ResourceGroupLocation }} --parameters resourceGroupName=${{ env.AzureResourceGroupName }} resourceGroupLocation=${{ env.ResourceGroupLocation }} environment=${{ env.Environment }} appNamePrefix=${{ env.AppNamePrefix }} HubSite=${{env.HubSiteUrl}} RequestListId=${{steps.Get_Project_List.outputs.List_Id}} MailListId=${{steps.Get_Project_Mail_List.outputs.MailList_Id}}

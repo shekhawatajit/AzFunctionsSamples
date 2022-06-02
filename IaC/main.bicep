@@ -15,7 +15,8 @@ param environment string
 param HubSite string
 @description('Guid of Request SharePoint list.')
 param RequestListId string
-
+@description('Guid of Mail SharePoint list.')
+param MailListId string
 // resource group created in target subscription
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: resourceGroupName
@@ -31,6 +32,7 @@ module FunctionResources 'FunctionResources.bicep' = {
     appNamePrefix: appNamePrefix
     environmentType: environment
     RequestListId: RequestListId
+    MailListId: MailListId
     HubSite: HubSite
   }
 }

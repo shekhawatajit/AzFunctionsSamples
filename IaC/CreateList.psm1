@@ -57,4 +57,54 @@ function New-RequestList {
     $RetVal = $List.Id.Guid.ToString();
     return $RetVal
 }
-Export-ModuleMember -Function New-RequestList
+function New-MailList {
+    Param (
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [String]$HubSiteUrl,
+        
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [String]$ClientID,
+    
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [String]$Certificate,
+
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [String]$TenantID
+    )        
+    Install-Module PnP.PowerShell -Scope CurrentUser -Force
+    
+    Write-Information "Creating mail list in Hub site if does not exist."
+    $ListTitle = "Project Request EMails"
+    $ListDescription = "List for system email for reporting status on new Project Site request."
+    #Connecting to site
+    Connect-PnPOnline -Url $HubSiteUrl -ClientId $ClientID -CertificateBase64Encoded $Certificate -Tenant $TenantID
+    
+    # Creating list
+    $List = Get-PnPList -Identity $ListTitle -ErrorAction SilentlyContinue
+    if (! $List) {
+        $List = New-PnPList -Title $ListTitle -Url "lists/ProjectStatusEmails" -Template GenericList -EnableVersioning -OnQuickLaunch:$false
+        $UpdatedList = Set-PnPList -Identity $ListTitle -Description $ListDescription 
+    }
+    # Creating fields if does not exist
+    $Fld1 = Get-PnPField -List $ListTitle -Identity 'Receiver' -ErrorAction SilentlyContinue
+    if (! $Fld1) {
+        $Fld1 = Add-PnPFieldFromXml -List $List -FieldXml "<Field Type='User' DisplayName='Receiver' List='UserInfo' Required='TRUE' EnforceUniqueValues='FALSE' ShowField='ImnName' UserSelectionMode='PeopleAndGroups' UserSelectionScope='0' Mult='TRUE' Sortable='FALSE' ID='{56a3d5ca-08d5-4248-a65e-65889da08cb3}' StaticName='Receiver' Name='Receiver' Description='Receiver of Project status.'/>"
+    }
+    $Fld2 = Get-PnPField -List $ListTitle -Identity 'Status' -ErrorAction SilentlyContinue
+    if (! $Fld4) {
+        $Fld4 = Add-PnPFieldFromXml -List $List -FieldXml "<Field Type='Note' DisplayName='Status' Required='FALSE' EnforceUniqueValues='FALSE' Indexed='FALSE' NumLines='6' RichText='FALSE' RichTextMode='Compatible' IsolateStyles='FALSE' Sortable='FALSE' ID='{c73c4ad5-0d6b-437d-8dfa-d61b6bead418}' StaticName='Status' Name='Status' Description='Project Status' RestrictedMode='TRUE' AppendOnly='FALSE'/>"
+    }
+    # rename Title field
+    $Fld = Set-PnPField -List $List -Identity "Title" -Values @{Title = "EMail Subject"; Description='EMail Subject.'}
+
+    # updating default view
+    $Views = Get-PnPView -List $List
+    $Views = Set-PnPView -List $List -Identity $Views[0].Id -Fields "Title", "Receiver", "Status"
+    $RetVal = $List.Id.Guid.ToString();
+    return $RetVal
+}
+Export-ModuleMember -Function New-RequestList, New-MailList 
