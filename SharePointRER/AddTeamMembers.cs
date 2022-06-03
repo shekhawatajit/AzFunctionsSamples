@@ -22,26 +22,28 @@ namespace Onrocks.SharePoint
             this.graphClient = graphServiceClient;
         }
         [FunctionName("AddTeamMembers")]
+        [FixedDelayRetry(5, "00:00:10")]
         public void Run([QueueTrigger("%Step2QueueName%", Connection = "AzureWebJobsStorage")] string projectQueueItem, ILogger log)
         {
             ProjectRequestInfo info = System.Text.Json.JsonSerializer.Deserialize<ProjectRequestInfo>(projectQueueItem);
             log.LogInformation($"Team members adding process started with data: {projectQueueItem}");
             try
             {
-                using (var pnpContext = pnpContextFactory.Create(new Uri(info.WebUrl)))
+                using (var pnpContext = pnpContextFactory.Create(new Uri(info.RequestSPSiteUrl)))
                 {
                     var Members = new List<ConversationMember>();
-                    IList list = pnpContext.Web.Lists.GetById(info.ListId);
-                    IListItem requestDetails = list.Items.GetById(info.ListItemId,
+                    IList list = pnpContext.Web.Lists.GetById(info.RequestListId);
+                    IListItem requestDetails = list.Items.GetById(info.RequestListItemId,
                             li => li.Title,
                             li => li.All);
                     // Using the value when not cleared
                     if (requestDetails["Owners"] != null)
                     {
+                        //log.LogInformation("");
                         foreach (IFieldUserValue user in (requestDetails["Owners"] as IFieldValueCollection)!.Values)
                         {
                             // Get the stored user lookup id value
-                            var upnUser = pnpContext.Web.GetUserById(info.RequestorId).UserPrincipalName;
+                            var upnUser = pnpContext.Web.GetUserById(user.LookupId).UserPrincipalName;
                             var objUser = string.Format("https://graph.microsoft.com/v1.0/users('{0}')", upnUser);
 
                             var TeamUser = new AadUserConversationMember
@@ -58,7 +60,7 @@ namespace Onrocks.SharePoint
                         foreach (IFieldUserValue user in (requestDetails["Members"] as IFieldValueCollection)!.Values)
                         {
                             // Get the stored user lookup id value
-                            var upnUser = pnpContext.Web.GetUserById(info.RequestorId).UserPrincipalName;
+                            var upnUser = pnpContext.Web.GetUserById(user.LookupId).UserPrincipalName;
                             var objUser = string.Format("https://graph.microsoft.com/v1.0/users('{0}')", upnUser);
 
                             var TeamUser = new AadUserConversationMember
@@ -70,7 +72,7 @@ namespace Onrocks.SharePoint
                             Members.Add(TeamUser);
                         }
                     }
-
+                    //Required Permissions:'TeamMember.ReadWrite.All'
                     graphClient.Teams[info.TeamsId].Members.Add(Members).Request().PostAsync();
 
                     //Sending Teams info and request info in Queue 2

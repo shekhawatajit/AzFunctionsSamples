@@ -135,7 +135,7 @@ resource functionalAppSettings 'Microsoft.Web/sites/config@2021-03-01' = {
     WEBSITE_LOAD_USER_PROFILE: 1
     
     CertificateName: 'oipdevelopment'
-    ClientId: '3764eb06-7e9d-408b-83e3-2d1982ac5707'
+    ClientId: 'eb8ae9d1-a744-41da-9209-5ef678497bd6'
     HubSite: HubSite
     KeyVaultName: 'oipkv'
     MailListId: MailListId

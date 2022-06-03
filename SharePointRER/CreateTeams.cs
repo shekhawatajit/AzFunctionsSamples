@@ -32,7 +32,7 @@ namespace Onrocks.SharePoint
             string ProjectTitle, ProjectDescription, ProjectRequestor;
             try
             {
-                using (var pnpContext = pnpContextFactory.Create(new Uri(info.WebUrl)))
+                using (var pnpContext = pnpContextFactory.Create(new Uri(info.RequestSPSiteUrl)))
                 {
                     //Reading data from SharePoint list
                     GetProjectRequestDetails(info, out ProjectTitle, out ProjectDescription, out ProjectRequestor, pnpContext);
@@ -49,6 +49,7 @@ namespace Onrocks.SharePoint
             }
             catch (System.Exception err)
             {
+                log.LogInformation(err.Message);
                 log.LogInformation(err.StackTrace);
             }
         }
@@ -82,21 +83,21 @@ namespace Onrocks.SharePoint
         {
             var team = new Team
             {
-                Visibility = TeamVisibilityType.Public,
+                Visibility = TeamVisibilityType.Private,
                 DisplayName = ProjectTitle,
                 Description = ProjectDescription,
                 AdditionalData = new Dictionary<string, object>() { { "template@odata.bind", "https://graph.microsoft.com/v1.0/teamsTemplates('standard')" } },
                 Members = new TeamMembersCollectionPage()
+                {
+                    new AadUserConversationMember
+                    {
+                        Roles = new List<String>(){"owner"},
+                        AdditionalData = new Dictionary<string, object>()
                         {
-                            new AadUserConversationMember
-                            {
-                                Roles = new List<String>(){"owner"},
-                                AdditionalData = new Dictionary<string, object>()
-                                {
-                                    {"user@odata.bind", "https://graph.microsoft.com/v1.0/users('" + ProjectRequestor + "')"}
-                                }
-                            }
-                        },
+                            {"user@odata.bind", "https://graph.microsoft.com/v1.0/users('" + ProjectRequestor + "')"}
+                        }
+                    }
+                },
             };
             var result = Task.Run(async () => await graphClient.Teams.Request().AddResponseAsync(team));
             string newTeamId = "";
@@ -106,8 +107,6 @@ namespace Onrocks.SharePoint
             }
             return newTeamId;
         }
-
-
         private void UpdateStep2Queue(ProjectRequestInfo info, string newTeamId)
         {
             string connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
@@ -123,8 +122,8 @@ namespace Onrocks.SharePoint
 
         private void GetProjectRequestDetails(ProjectRequestInfo info, out string ProjectTitle, out string ProjectDescription, out string ProjectRequestor, PnPContext pnpContext)
         {
-            IList list = pnpContext.Web.Lists.GetById(info.ListId);
-            IListItem requestDetails = list.Items.GetById(info.ListItemId,
+            IList list = pnpContext.Web.Lists.GetById(info.RequestListId);
+            IListItem requestDetails = list.Items.GetById(info.RequestListItemId,
                     li => li.Title,
                     li => li.All);
             ProjectTitle = requestDetails.Title == null ? string.Empty : requestDetails.Title;
