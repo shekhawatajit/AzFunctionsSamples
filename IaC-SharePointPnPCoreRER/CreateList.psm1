@@ -95,8 +95,8 @@ function New-MailList {
         $Fld1 = Add-PnPFieldFromXml -List $List -FieldXml "<Field Type='User' DisplayName='Receiver' List='UserInfo' Required='TRUE' EnforceUniqueValues='FALSE' ShowField='ImnName' UserSelectionMode='PeopleAndGroups' UserSelectionScope='0' Mult='TRUE' Sortable='FALSE' ID='{56a3d5ca-08d5-4248-a65e-65889da08cb3}' StaticName='Receiver' Name='Receiver' Description='Receiver of Project status.'/>"
     }
     $Fld2 = Get-PnPField -List $ListTitle -Identity 'Status' -ErrorAction SilentlyContinue
-    if (! $Fld4) {
-        $Fld4 = Add-PnPFieldFromXml -List $List -FieldXml "<Field Type='Note' DisplayName='Status' Required='FALSE' EnforceUniqueValues='FALSE' Indexed='FALSE' NumLines='6' RichText='FALSE' RichTextMode='Compatible' IsolateStyles='FALSE' Sortable='FALSE' ID='{c73c4ad5-0d6b-437d-8dfa-d61b6bead418}' StaticName='Status' Name='Status' Description='Project Status' RestrictedMode='TRUE' AppendOnly='FALSE'/>"
+    if (! $Fld2) {
+        $Fld2 = Add-PnPFieldFromXml -List $List -FieldXml "<Field Type='Note' DisplayName='Status' Required='FALSE' EnforceUniqueValues='FALSE' Indexed='FALSE' NumLines='6' RichText='FALSE' RichTextMode='Compatible' IsolateStyles='FALSE' Sortable='FALSE' ID='{c73c4ad5-0d6b-437d-8dfa-d61b6bead418}' StaticName='Status' Name='Status' Description='Project Status' RestrictedMode='TRUE' AppendOnly='FALSE'/>"
     }
     # rename Title field
     $Fld = Set-PnPField -List $List -Identity "Title" -Values @{Title = "EMail Subject"; Description='EMail Subject.'}
