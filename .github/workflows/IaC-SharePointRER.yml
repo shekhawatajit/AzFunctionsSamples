@@ -9,7 +9,7 @@ on:
 permissions:
       id-token: write
       contents: read
-      
+
 env:
     AzureResourceGroupName: 'oip'
     ResourceGroupLocation : 'northeurope'
@@ -57,5 +57,5 @@ jobs:
       with:
         azcliversion: 2.36.0
         inlineScript: |
-          az account set --subscription ${{ env.AzSubscription }}
+          az account set --subscription  ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           az deployment sub create --name azFunction --template-file ./IaC-SharePointRER/main.bicep --location ${{ env.ResourceGroupLocation }} --parameters resourceGroupName=${{ env.AzureResourceGroupName }} resourceGroupLocation=${{ env.ResourceGroupLocation }} environment=${{ env.Environment }} appNamePrefix=${{ env.AppNamePrefix }} HubSite=${{env.HubSiteUrl}} RequestListId=${{steps.Get_Project_List.outputs.List_Id}} MailListId=${{steps.Get_Project_Mail_List.outputs.MailList_Id}}
