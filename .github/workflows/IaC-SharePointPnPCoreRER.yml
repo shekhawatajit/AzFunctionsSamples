@@ -6,6 +6,10 @@ on:
     paths: 'IaC-SharePointPnPCoreRER/**'
   workflow_dispatch:
 
+permissions:
+      id-token: write
+      contents: read
+      
 env:
     AzureResourceGroupName: 'extoip'
     ResourceGroupLocation : 'northeurope'

@@ -6,6 +6,10 @@ on:
     paths: 'IaC-SharePointRER/**'
   workflow_dispatch:
 
+permissions:
+      id-token: write
+      contents: read
+      
 env:
     AzureResourceGroupName: 'oip'
     ResourceGroupLocation : 'northeurope'
