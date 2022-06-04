@@ -1,0 +1,57 @@
+name: Partner Solution
+
+on: 
+  push:
+    branches: [ master ]
+    paths: 'IaC-SharePointPnPCoreRER/**'
+  workflow_dispatch:
+
+env:
+    AzureResourceGroupName: 'extoip'
+    ResourceGroupLocation : 'northeurope'
+    AppNamePrefix : 'extoip'
+    Environment: 'nonprod'
+    HubSiteUrl: 'https://onrocks.sharepoint.com/sites/ExRelationHubSite'
+    
+jobs:
+  deployment:
+    runs-on: ubuntu-latest
+    steps:
+    
+    # Checkout code
+    - uses: actions/checkout@v2
+
+    - name: Get Project Request List
+      run: |
+        Import-Module ./IaC-SharePointPnPCoreRER/CreateList.psm1
+        $ListId = New-RequestList -HubSiteUrl ${{env.HubSiteUrl}} -ClientID ${{secrets.AZURE_CLIENT_ID_1}} -Certificate ${{secrets.CLIENTSECRET}} -TenantID ${{ secrets.AZURE_TENANT_ID }}
+        echo "::set-output name=List_Id::$ListId"
+        Write-Host $ListId
+      id: Get_Project_List
+      shell: pwsh
+
+    - name: Get Project Email List
+      run: |
+        Import-Module ./IaC-SharePointPnPCoreRER/CreateList.psm1
+        $MailListId = New-MailList -HubSiteUrl ${{env.HubSiteUrl}} -ClientID ${{secrets.AZURE_CLIENT_ID_1}} -Certificate ${{secrets.CLIENTSECRET}} -TenantID ${{ secrets.AZURE_TENANT_ID }}
+        echo "::set-output name=MailList_Id::$MailListId"
+        Write-Host $MailListId
+      id: Get_Project_Mail_List
+      shell: pwsh
+
+    # Log into Azure
+    - name: 'Az CLI login'
+      uses: azure/login@v1
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID_1 }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    # Deployment
+    - name: Azure CLI script
+      uses: azure/CLI@v1
+      with:
+        azcliversion: 2.36.0
+        inlineScript: |
+          az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          az deployment sub create --name azFunction --template-file ./IaC-SharePointPnPCoreRER/main.bicep --location ${{ env.ResourceGroupLocation }} --parameters resourceGroupName=${{ env.AzureResourceGroupName }} resourceGroupLocation=${{ env.ResourceGroupLocation }} environment=${{ env.Environment }} appNamePrefix=${{ env.AppNamePrefix }} HubSite=${{env.HubSiteUrl}} RequestListId=${{steps.Get_Project_List.outputs.List_Id}} MailListId=${{steps.Get_Project_Mail_List.outputs.MailList_Id}}
