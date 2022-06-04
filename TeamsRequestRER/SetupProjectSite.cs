@@ -60,7 +60,7 @@ namespace Onrocks.SharePoint
                     // Using the value when not cleared
                     if (requestDetails["Visitors"] != null)
                     {
-                        foreach (IFieldUserValue user in (requestDetails["Owners"] as IFieldValueCollection)!.Values)
+                        foreach (IFieldUserValue user in (requestDetails["Visitors"] as IFieldValueCollection)!.Values)
                         {
                             // Get the stored user lookup id value
                             var LoginName = contextPrimaryHub.Web.GetUserById(user.LookupId).LoginName;

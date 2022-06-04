@@ -3,7 +3,7 @@ name: Partner Solution
 on: 
   push:
     branches: [ master ]
-    paths: 'IaC-SharePointPnPCoreRER/**'
+    paths: 'IaC-SiteRequestRER/**'
   workflow_dispatch:
 
 permissions:
@@ -27,7 +27,7 @@ jobs:
 
     - name: Get Project Request List
       run: |
-        Import-Module ./IaC-SharePointPnPCoreRER/CreateList.psm1
+        Import-Module ./IaC-SiteRequestRER/CreateList.psm1
         $ListId = New-RequestList -HubSiteUrl ${{env.HubSiteUrl}} -ClientID ${{secrets.AZURE_CLIENT_ID_1}} -Certificate ${{secrets.CLIENTSECRET}} -TenantID ${{ secrets.AZURE_TENANT_ID }}
         echo "::set-output name=List_Id::$ListId"
         Write-Host $ListId
@@ -36,7 +36,7 @@ jobs:
 
     - name: Get Project Email List
       run: |
-        Import-Module ./IaC-SharePointPnPCoreRER/CreateList.psm1
+        Import-Module ./IaC-SiteRequestRER/CreateList.psm1
         $MailListId = New-MailList -HubSiteUrl ${{env.HubSiteUrl}} -ClientID ${{secrets.AZURE_CLIENT_ID_1}} -Certificate ${{secrets.CLIENTSECRET}} -TenantID ${{ secrets.AZURE_TENANT_ID }}
         echo "::set-output name=MailList_Id::$MailListId"
         Write-Host $MailListId
@@ -58,4 +58,4 @@ jobs:
         azcliversion: 2.36.0
         inlineScript: |
           az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          az deployment sub create --name azFunction --template-file ./IaC-SharePointPnPCoreRER/main.bicep --location ${{ env.ResourceGroupLocation }} --parameters resourceGroupName=${{ env.AzureResourceGroupName }} resourceGroupLocation=${{ env.ResourceGroupLocation }} environment=${{ env.Environment }} appNamePrefix=${{ env.AppNamePrefix }} HubSite=${{env.HubSiteUrl}} RequestListId=${{steps.Get_Project_List.outputs.List_Id}} MailListId=${{steps.Get_Project_Mail_List.outputs.MailList_Id}}
+          az deployment sub create --name azFunction --template-file ./IaC-SiteRequestRER/main.bicep --location ${{ env.ResourceGroupLocation }} --parameters resourceGroupName=${{ env.AzureResourceGroupName }} resourceGroupLocation=${{ env.ResourceGroupLocation }} environment=${{ env.Environment }} appNamePrefix=${{ env.AppNamePrefix }} HubSite=${{env.HubSiteUrl}} RequestListId=${{steps.Get_Project_List.outputs.List_Id}} MailListId=${{steps.Get_Project_Mail_List.outputs.MailList_Id}}
