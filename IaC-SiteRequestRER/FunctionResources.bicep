@@ -55,8 +55,7 @@ var appInsightsName = '${appNamePrefix}-appinsights'
 var workspaceName = '${appNamePrefix}-workspace'
 var storageAccountName = format('{0}sta', replace(appNamePrefix, '-', ''))
 var step1queueName = '${appNamePrefix}-step1queue'
-var step2queueName = '${appNamePrefix}-step2queue'
-var step3queueName = '${appNamePrefix}-step3queue'
+
 resource storageaccount 'Microsoft.Storage/storageAccounts@2021-02-01' = {
   name: storageAccountName
   location: location
@@ -71,14 +70,7 @@ resource step1queue 'Microsoft.Storage/storageAccounts/queueServices/queues@2021
   name: step1queueName
   parent: queueservice
 }
-resource step2queue 'Microsoft.Storage/storageAccounts/queueServices/queues@2021-02-01' = {
-  name: step2queueName
-  parent: queueservice
-}
-resource step3queue 'Microsoft.Storage/storageAccounts/queueServices/queues@2021-02-01' = {
-  name: step3queueName
-  parent: queueservice
-}
+
 resource appServicePlan 'Microsoft.Web/serverfarms@2020-12-01' = {
   name: appServiceName
   location: location
@@ -141,5 +133,6 @@ resource functionalAppSettings 'Microsoft.Web/sites/config@2021-03-01' = {
     MailListId: MailListId
     TenantId: '51575b39-28de-4120-94c6-af4c743f70f1'
     RequestListId: RequestListId
+    Step1QueueName: step1queue.name
   }
 }
