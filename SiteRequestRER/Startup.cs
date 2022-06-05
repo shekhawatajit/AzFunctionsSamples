@@ -6,8 +6,8 @@ using System.Security.Cryptography.X509Certificates;
 using System;
 using Microsoft.Azure.WebJobs;
 using Azure.Security.KeyVault.Certificates;
-using Microsoft.Graph;
 using Azure.Identity;
+using PnP.Framework;
 
 [assembly: FunctionsStartup(typeof(Onrocks.SharePoint.Startup))]
 namespace Onrocks.SharePoint
@@ -19,40 +19,14 @@ namespace Onrocks.SharePoint
             var config = builder.GetContext().Configuration;
             var azureFunctionSettings = new AzureFunctionSettings();
             config.Bind(azureFunctionSettings);
-            /*            #nullable enable
-                        AzureFunctionSettings? azureFunctionSettings = null;
-                        #nullable disable
-                        // Add our global configuration instance
-                        builder.Services.AddSingleton(options =>
-                        {
-                            var config = builder.GetContext().Configuration;
-                            var azureFunctionSettings = new AzureFunctionSettings();
-                            config.Bind(azureFunctionSettings);
-                            return config;
-                        });
-                        // Add our configuration class
-                        builder.Services.AddSingleton(options => { return azureFunctionSettings!; });*/
+            var cert = LoadCertificate(azureFunctionSettings);
             builder.Services.AddPnPCore(options =>
             {
                 // Configure an authentication provider with certificate (Required for app only)
-                var authProvider = new X509CertificateAuthenticationProvider(azureFunctionSettings!.ClientId, azureFunctionSettings.TenantId, LoadCertificate(azureFunctionSettings));
+                var authProvider = new X509CertificateAuthenticationProvider(azureFunctionSettings!.ClientId, azureFunctionSettings.TenantId, cert);
                 // And set it as default
                 options.DefaultAuthenticationProvider = authProvider;
             });
-            builder.Services.AddSingleton(option =>
-            {
-                var CredentialOptions = new TokenCredentialOptions
-                {
-                    AuthorityHost = AzureAuthorityHosts.AzurePublicCloud
-                };
-                // Certificate based Credential  singleton
-                var clientCertCredential = new ClientCertificateCredential(azureFunctionSettings!.TenantId, azureFunctionSettings!.ClientId, LoadCertificate(azureFunctionSettings), CredentialOptions);
-                var scopes = new[] { "https://graph.microsoft.com/.default" };
-
-                return new GraphServiceClient(clientCertCredential, scopes);
-            });
-
-
         }
         private static X509Certificate2 LoadCertificate(AzureFunctionSettings settings)
         {

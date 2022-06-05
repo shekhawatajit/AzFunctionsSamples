@@ -7,18 +7,22 @@ using PnP.Core.Model.SharePoint;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using PnP.Core.Admin.Model.SharePoint;
-
+using PnP.Framework;
+using PnP.Framework.Provisioning.ObjectHandlers;
+using PnP.Framework.Provisioning.Providers.Xml;
+using Microsoft.SharePoint.Client;
+using System.Threading;
+using System.IO;
 namespace Onrocks.SharePoint
 {
     public class SetupSite
     {
         // private readonly AzureFunctionSettings azureFunctionSettings;
         private readonly IPnPContextFactory pnpContextFactory;
-        private readonly GraphServiceClient graphClient;
-        public SetupSite(IPnPContextFactory pnpContextFactory, GraphServiceClient graphServiceClient)
+
+        public SetupSite(IPnPContextFactory pnpContextFactory)
         {
             this.pnpContextFactory = pnpContextFactory;
-            this.graphClient = graphServiceClient;
         }
         [FunctionName("SetupSite")]
         [FixedDelayRetry(5, "00:00:10")]
@@ -29,10 +33,10 @@ namespace Onrocks.SharePoint
             try
             {
                 string ProjectTitle, ProjectDescription, ProjectRequestor;
+                string teamsSiteUrl;
                 using (var contextPrimaryHub = await pnpContextFactory.CreateAsync(new Uri(info.RequestSPSiteUrl)))
                 {
-                    //Reading data from SharePoint list
-                    // Get the primary hub site details
+                    //Reading data from SharePoint list and Geting the primary hub site details
                     ISite primarySite = await contextPrimaryHub.Site.GetAsync(
                         p => p.HubSiteId,
                         p => p.IsHubSite);
@@ -44,15 +48,27 @@ namespace Onrocks.SharePoint
                     ProjectTitle = requestDetails.Title == null ? string.Empty : requestDetails.Title;
                     ProjectDescription = requestDetails["Description"] == null ? string.Empty : requestDetails["Description"].ToString()!;
                     ProjectRequestor = contextPrimaryHub.Web.GetUserById(info.RequestorId).UserPrincipalName;
-                    string siteName = Regex.Replace(ProjectTitle, @"\s", "");
+                    
+                    //Generating Unique site Url
+                    var uniqeId = Guid.NewGuid().ToString().Split('-')[1];
+                    string siteName = Regex.Replace(ProjectTitle, @"\s", "") + uniqeId;
 
+                    //Reading Provisining Template
+
+                    string templateUrl = $"{contextPrimaryHub.Uri.PathAndQuery}/SiteAssets/externalSiteTemplate.xml";
+                    IFile templateDocument = await contextPrimaryHub.Web.GetFileByServerRelativeUrlAsync(templateUrl);
+                    // Download the file as stream
+                    Stream downloadedContentStream = await templateDocument.GetContentAsync();
+                    var provisioningTemplate = XMLPnPSchemaFormatter.LatestFormatter.ToProvisioningTemplate(downloadedContentStream);
+                    log.LogInformation($"Template ID to apply :{provisioningTemplate.Id}");
                     //Creating new request for Teams site without Group  
                     var teamsSiteToCreate = new TeamSiteWithoutGroupOptions(new Uri($"https://{contextPrimaryHub.Uri.DnsSafeHost}/sites/{siteName}"), ProjectTitle)
                     {
                         Description = ProjectDescription,
-                        Language = Language.English,
+                        //Language = Language.English,
                         Owner = $"i:0#.f|membership|{ProjectRequestor}"
                     };
+                    teamsSiteUrl = teamsSiteToCreate.Url.AbsoluteUri;
                     log.LogInformation($"Creating site: {teamsSiteToCreate.Url}");
 
                     // Create the new site collection
@@ -107,6 +123,25 @@ namespace Onrocks.SharePoint
                                     newSiteContext.Web.AssociatedVisitorGroup.AddUser(LoginName);
                                 }
                             }
+                        }
+
+                        //Provisioning using PnP.Framework becuase PnP.Core does not work
+                        using (ClientContext csomContext = PnPCoreSdk.Instance.GetClientContext(newSiteContext))
+                        {
+                            // Use CSOM to load the web title
+                            csomContext.RequestTimeout = Timeout.Infinite;
+                            Web web = csomContext.Web;
+                            csomContext.Load(web, w => w.Title);
+                            csomContext.ExecuteQueryRetry();
+                            ProvisioningTemplateApplyingInformation ptai = new ProvisioningTemplateApplyingInformation
+                            {
+                                ProgressDelegate = delegate (String message, Int32 progress, Int32 total)
+                                {
+                                    log.LogInformation(String.Format("{0:00}/{1:00} - {2}", progress, total, message));
+                                },
+                                IgnoreDuplicateDataRowErrors = true
+                            };
+                            web.ApplyProvisioningTemplate(provisioningTemplate, ptai);
                         }
                     }
                 }

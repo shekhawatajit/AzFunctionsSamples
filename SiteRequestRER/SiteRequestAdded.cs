@@ -17,11 +17,9 @@ namespace Onrocks.SharePoint
     public class SiteRequestAdded
     {
         private readonly IPnPContextFactory pnpContextFactory;
-        private readonly GraphServiceClient graphClient;
-        public SiteRequestAdded(IPnPContextFactory pnpContextFactory, GraphServiceClient graphServiceClient)
+        public SiteRequestAdded(IPnPContextFactory pnpContextFactory)
         {
             this.pnpContextFactory = pnpContextFactory;
-            this.graphClient = graphServiceClient;
         }
 
         [FunctionName("SiteRequestAdded")]
