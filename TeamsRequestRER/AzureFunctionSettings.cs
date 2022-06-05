@@ -3,7 +3,7 @@ namespace Onrocks.SharePoint
 {
     public class AzureFunctionSettings
     {
-        #nullable enable
+#nullable enable
         public string? TenantId { get; set; }
         public string? ClientId { get; set; }
         public string? CertificateName { get; set; }
@@ -11,6 +11,6 @@ namespace Onrocks.SharePoint
         public string? HubSite { get; set; }
         public Guid RequestListId { get; set; }
         public Guid MailListId { get; set; }
-        #nullable disable
+#nullable disable
     }
 }

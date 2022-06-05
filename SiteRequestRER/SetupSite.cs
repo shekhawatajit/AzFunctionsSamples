@@ -1,7 +1,6 @@
 using System;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
-using Microsoft.Graph;
 using PnP.Core.Services;
 using PnP.Core.Model.SharePoint;
 using System.Threading.Tasks;
@@ -48,19 +47,19 @@ namespace Onrocks.SharePoint
                     ProjectTitle = requestDetails.Title == null ? string.Empty : requestDetails.Title;
                     ProjectDescription = requestDetails["Description"] == null ? string.Empty : requestDetails["Description"].ToString()!;
                     ProjectRequestor = contextPrimaryHub.Web.GetUserById(info.RequestorId).UserPrincipalName;
-                    
+
                     //Generating Unique site Url
                     var uniqeId = Guid.NewGuid().ToString().Split('-')[1];
                     string siteName = Regex.Replace(ProjectTitle, @"\s", "") + uniqeId;
 
                     //Reading Provisining Template
-
-                    string templateUrl = $"{contextPrimaryHub.Uri.PathAndQuery}/SiteAssets/externalSiteTemplate.xml";
+                    string templateUrl = Environment.GetEnvironmentVariable("ProvisioningTemplateXmlFileUrl");
                     IFile templateDocument = await contextPrimaryHub.Web.GetFileByServerRelativeUrlAsync(templateUrl);
-                    // Download the file as stream
+                     // Download the template file as stream
                     Stream downloadedContentStream = await templateDocument.GetContentAsync();
                     var provisioningTemplate = XMLPnPSchemaFormatter.LatestFormatter.ToProvisioningTemplate(downloadedContentStream);
                     log.LogInformation($"Template ID to apply :{provisioningTemplate.Id}");
+                    
                     //Creating new request for Teams site without Group  
                     var teamsSiteToCreate = new TeamSiteWithoutGroupOptions(new Uri($"https://{contextPrimaryHub.Uri.DnsSafeHost}/sites/{siteName}"), ProjectTitle)
                     {

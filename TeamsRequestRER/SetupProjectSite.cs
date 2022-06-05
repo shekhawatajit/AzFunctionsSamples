@@ -5,8 +5,13 @@ using Microsoft.Graph;
 using PnP.Core.Services;
 using PnP.Core.Model.SharePoint;
 using System.Threading.Tasks;
-using PnP.Core.Model.Security;
-using System.Collections.Generic;
+using System.IO;
+using PnP.Framework;
+using PnP.Framework.Provisioning.ObjectHandlers;
+using PnP.Framework.Provisioning.Providers.Xml;
+using Microsoft.SharePoint.Client;
+using System.Threading;
+
 namespace Onrocks.SharePoint
 {
     public class SetupProjectSite
@@ -42,6 +47,14 @@ namespace Onrocks.SharePoint
                         li => li.Title,
                         li => li.All);
 
+                //Reading Provisining Template
+                string templateUrl = Environment.GetEnvironmentVariable("ProvisioningTemplateXmlFileUrl");
+                IFile templateDocument = await contextPrimaryHub.Web.GetFileByServerRelativeUrlAsync(templateUrl);
+                // Download the template file as stream
+                Stream downloadedContentStream = await templateDocument.GetContentAsync();
+                var provisioningTemplate = XMLPnPSchemaFormatter.LatestFormatter.ToProvisioningTemplate(downloadedContentStream);
+                log.LogInformation($"Template ID to apply :{provisioningTemplate.Id}");
+
                 // Working on Teams Site
                 using (var context = await pnpContextFactory.CreateAsync(new Uri(TeamSiteUrl)))
                 {
@@ -69,6 +82,24 @@ namespace Onrocks.SharePoint
                                 context.Web.AssociatedVisitorGroup.AddUser(LoginName);
                             }
                         }
+                    }
+                    //Provisioning using PnP.Framework becuase PnP.Core does not work
+                    using (ClientContext csomContext = PnPCoreSdk.Instance.GetClientContext(context))
+                    {
+                        // Use CSOM to load the web title
+                        csomContext.RequestTimeout = Timeout.Infinite;
+                        Web web = csomContext.Web;
+                        csomContext.Load(web, w => w.Title);
+                        csomContext.ExecuteQueryRetry();
+                        ProvisioningTemplateApplyingInformation ptai = new ProvisioningTemplateApplyingInformation
+                        {
+                            ProgressDelegate = delegate (String message, Int32 progress, Int32 total)
+                            {
+                                log.LogInformation(String.Format("{0:00}/{1:00} - {2}", progress, total, message));
+                            },
+                            IgnoreDuplicateDataRowErrors = true
+                        };
+                        web.ApplyProvisioningTemplate(provisioningTemplate, ptai);
                     }
                 }
             }

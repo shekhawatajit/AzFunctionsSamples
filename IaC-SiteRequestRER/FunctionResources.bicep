@@ -134,5 +134,6 @@ resource functionalAppSettings 'Microsoft.Web/sites/config@2021-03-01' = {
     TenantId: '51575b39-28de-4120-94c6-af4c743f70f1'
     RequestListId: RequestListId
     Step1QueueName: step1queue.name
+    ProvisioningTemplateXmlFileUrl:'https://onrocks.sharepoint.com/sites/ExRelationHubSite/SiteAssets/SiteTemplate.xml'
   }
 }

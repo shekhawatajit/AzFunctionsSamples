@@ -144,5 +144,6 @@ resource functionalAppSettings 'Microsoft.Web/sites/config@2021-03-01' = {
     Step2QueueName: step2queue.name
     Step3QueueName: step3queue.name
     RequestListId: RequestListId
+    ProvisioningTemplateXmlFileUrl:'https://onrocks.sharepoint.com/sites/RelationHubSite/SiteAssets/SiteTemplate.xml'
   }
 }
