@@ -33,7 +33,7 @@ namespace Onrocks.SharePoint
 
             //Get Teams site Url 
             var TeamSiteUrl = graphClient.Groups[info.TeamsId].Sites["root"].Request().GetAsync().Result.WebUrl;
-
+            log.LogInformation($"Teams site Url to process : {TeamSiteUrl}");
             using (var contextPrimaryHub = await pnpContextFactory.CreateAsync(new Uri(info.RequestSPSiteUrl)))
             {
                 // Get the primary hub site details
@@ -48,7 +48,7 @@ namespace Onrocks.SharePoint
                         li => li.All);
 
                 //Reading Provisining Template
-                string templateUrl = Environment.GetEnvironmentVariable("ProvisioningTemplateXmlFileUrl");
+                string templateUrl = string.Format("{0}{1}",contextPrimaryHub.Uri.PathAndQuery, Environment.GetEnvironmentVariable("ProvisioningTemplateXmlFileUrl"));
                 IFile templateDocument = await contextPrimaryHub.Web.GetFileByServerRelativeUrlAsync(templateUrl);
                 // Download the template file as stream
                 Stream downloadedContentStream = await templateDocument.GetContentAsync();

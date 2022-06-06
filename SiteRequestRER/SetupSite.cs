@@ -53,7 +53,7 @@ namespace Onrocks.SharePoint
                     string siteName = Regex.Replace(ProjectTitle, @"\s", "") + uniqeId;
 
                     //Reading Provisining Template
-                    string templateUrl = Environment.GetEnvironmentVariable("ProvisioningTemplateXmlFileUrl");
+                    string templateUrl = string.Format("{0}{1}",contextPrimaryHub.Uri.PathAndQuery, Environment.GetEnvironmentVariable("ProvisioningTemplateXmlFileUrl"));
                     IFile templateDocument = await contextPrimaryHub.Web.GetFileByServerRelativeUrlAsync(templateUrl);
                      // Download the template file as stream
                     Stream downloadedContentStream = await templateDocument.GetContentAsync();
