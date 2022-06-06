@@ -1,9 +1,6 @@
 name: Partner Solution
 
 on: 
-  push:
-    branches: [ master ]
-    paths: 'IaC-SiteRequestRER/**'
   workflow_dispatch:
 
 permissions:

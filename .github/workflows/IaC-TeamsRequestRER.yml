@@ -1,9 +1,6 @@
 name: Teams Solution
 
 on: 
-  push:
-    branches: [ master ]
-    paths: 'IaC-TeamsRequestRER/**'
   workflow_dispatch:
 
 permissions:
