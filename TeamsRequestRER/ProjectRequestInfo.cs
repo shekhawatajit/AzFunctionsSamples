@@ -1,5 +1,5 @@
 using System;
-namespace Onrocks.SharePoint
+namespace Adidas.OIP
 {
     public class ProjectRequestInfo
     {

@@ -10,21 +10,21 @@ using Newtonsoft.Json.Linq;
 using System;
 using Azure.Storage.Queues;
 using System.IO;
-using PnP.Core.Services;
 using Microsoft.Graph;
-namespace Onrocks.SharePoint
+namespace Adidas.OIP
 {
-    public class ProjectRequestAdded
+    public class OIPRequestAdded
     {
-        private readonly IPnPContextFactory pnpContextFactory;
+        private readonly AzureFunctionSettings azureFunctionSettings;
+
         private readonly GraphServiceClient graphClient;
-        public ProjectRequestAdded(IPnPContextFactory pnpContextFactory, GraphServiceClient graphServiceClient)
+        public OIPRequestAdded(AzureFunctionSettings settings, GraphServiceClient graphServiceClient)
         {
-            this.pnpContextFactory = pnpContextFactory;
+            this.azureFunctionSettings = settings;
             this.graphClient = graphServiceClient;
         }
 
-        [FunctionName("ProjectRequestAdded")]
+        [FunctionName("OIPRequestAdded")]
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req, ILogger log)
         {
             log.LogInformation("Item Added HTTP trigger function processed a request.");

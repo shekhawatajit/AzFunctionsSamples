@@ -3,22 +3,19 @@ using Microsoft.Azure.WebJobs;
 using Azure.Storage.Queues;
 using Microsoft.Extensions.Logging;
 using Microsoft.Graph;
-using PnP.Core.Services;
-using PnP.Core.Model.SharePoint;
-
+using PnP.Framework;
+using Microsoft.SharePoint.Client;
 using System.Collections.Generic;
 
-
-namespace Onrocks.SharePoint
+namespace Adidas.OIP
 {
     public class AddTeamMembers
     {
-        // private readonly AzureFunctionSettings azureFunctionSettings;
-        private readonly IPnPContextFactory pnpContextFactory;
         private readonly GraphServiceClient graphClient;
-        public AddTeamMembers(IPnPContextFactory pnpContextFactory, GraphServiceClient graphServiceClient)
+        private readonly AzureFunctionSettings azureFunctionSettings;
+        public AddTeamMembers(AzureFunctionSettings settings, GraphServiceClient graphServiceClient)
         {
-            this.pnpContextFactory = pnpContextFactory;
+            this.azureFunctionSettings = settings;
             this.graphClient = graphServiceClient;
         }
         [FunctionName("AddTeamMembers")]
@@ -29,23 +26,22 @@ namespace Onrocks.SharePoint
             log.LogInformation($"Team members adding process started with data: {projectQueueItem}");
             try
             {
-                using (var pnpContext = pnpContextFactory.Create(new Uri(info.RequestSPSiteUrl)))
+                using (var pnpContext = new AuthenticationManager().GetACSAppOnlyContext(info.RequestSPSiteUrl, azureFunctionSettings.ClientId, azureFunctionSettings.ClientSecret))
                 {
                     var Members = new List<ConversationMember>();
-                    IList list = pnpContext.Web.Lists.GetById(info.RequestListId);
-                    IListItem requestDetails = list.Items.GetById(info.RequestListItemId,
-                            li => li.Title,
-                            li => li.All);
+                    var list = pnpContext.Web.Lists.GetById(info.RequestListId);
+                    var requestDetails = list.GetItemById(info.RequestListItemId);
+                    pnpContext.Load(requestDetails);
+                    pnpContext.ExecuteQuery();
                     // Using the value when not cleared
                     if (requestDetails["Owners"] != null)
                     {
                         //log.LogInformation("");
-                        foreach (IFieldUserValue user in (requestDetails["Owners"] as IFieldValueCollection)!.Values)
+                        var userField = requestDetails.FieldValues["Owners"] as FieldUserValue[];
+                        foreach (FieldUserValue userFieldValue in userField)
                         {
                             // Get the stored user lookup id value
-                            var upnUser = pnpContext.Web.GetUserById(user.LookupId).UserPrincipalName;
-                            var objUser = string.Format("https://graph.microsoft.com/v1.0/users('{0}')", upnUser);
-
+                            var objUser = string.Format("https://graph.microsoft.com/v1.0/users('{0}')", userFieldValue.Email);
                             var TeamUser = new AadUserConversationMember
                             {
                                 Roles = new List<String>() { "owner" },
@@ -57,12 +53,11 @@ namespace Onrocks.SharePoint
                     }
                     if (requestDetails["Members"] != null)
                     {
-                        foreach (IFieldUserValue user in (requestDetails["Members"] as IFieldValueCollection)!.Values)
+                        var userField = requestDetails.FieldValues["Members"] as FieldUserValue[];
+                        foreach (FieldUserValue userFieldValue in userField)
                         {
                             // Get the stored user lookup id value
-                            var upnUser = pnpContext.Web.GetUserById(user.LookupId).UserPrincipalName;
-                            var objUser = string.Format("https://graph.microsoft.com/v1.0/users('{0}')", upnUser);
-
+                            var objUser = string.Format("https://graph.microsoft.com/v1.0/users('{0}')", userFieldValue.Email);
                             var TeamUser = new AadUserConversationMember
                             {
                                 Roles = new List<String>() { },

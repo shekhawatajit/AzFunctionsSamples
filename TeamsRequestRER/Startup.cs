@@ -1,30 +1,27 @@
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using PnP.Core.Auth;
-using System.Security.Cryptography.X509Certificates;
+using PnP.Framework;
 using System;
 using Microsoft.Azure.WebJobs;
-using Azure.Security.KeyVault.Certificates;
+using Azure.Security.KeyVault.Secrets;
 using Microsoft.Graph;
 using Azure.Identity;
 
-[assembly: FunctionsStartup(typeof(Onrocks.SharePoint.Startup))]
-namespace Onrocks.SharePoint
+[assembly: FunctionsStartup(typeof(Adidas.OIP.Startup))]
+namespace Adidas.OIP
 {
     public class Startup : FunctionsStartup
     {
         public override void Configure(IFunctionsHostBuilder builder)
         {
-            var config = builder.GetContext().Configuration;
             var azureFunctionSettings = new AzureFunctionSettings();
-            config.Bind(azureFunctionSettings);
-            builder.Services.AddPnPCore(options =>
+            builder.Services.AddSingleton(option =>
             {
-                // Configure an authentication provider with certificate (Required for app only)
-                var authProvider = new X509CertificateAuthenticationProvider(azureFunctionSettings!.ClientId, azureFunctionSettings.TenantId, LoadCertificate(azureFunctionSettings));
-                // And set it as default
-                options.DefaultAuthenticationProvider = authProvider;
+                var config = builder.GetContext().Configuration;
+                config.Bind(azureFunctionSettings);
+                azureFunctionSettings.ClientSecret = LoadSecret(azureFunctionSettings).Value;
+                return azureFunctionSettings;
             });
             builder.Services.AddSingleton(option =>
             {
@@ -33,19 +30,16 @@ namespace Onrocks.SharePoint
                     AuthorityHost = AzureAuthorityHosts.AzurePublicCloud
                 };
                 // Certificate based Credential  singleton
-                var clientCertCredential = new ClientCertificateCredential(azureFunctionSettings!.TenantId, azureFunctionSettings!.ClientId, LoadCertificate(azureFunctionSettings), CredentialOptions);
+                var clientSecretCredential = new ClientSecretCredential(azureFunctionSettings!.TenantId, azureFunctionSettings!.ClientId, azureFunctionSettings!.ClientSecret, CredentialOptions);
                 var scopes = new[] { "https://graph.microsoft.com/.default" };
-
-                return new GraphServiceClient(clientCertCredential, scopes);
+                return new GraphServiceClient(clientSecretCredential, scopes);
             });
-
-
         }
-        private static X509Certificate2 LoadCertificate(AzureFunctionSettings settings)
+        private static KeyVaultSecret LoadSecret(AzureFunctionSettings settings)
         {
             var KeyVaultUrl = string.Format("https://{0}.vault.azure.net/", settings.KeyVaultName);
-            CertificateClient client = new CertificateClient(new Uri(KeyVaultUrl), new DefaultAzureCredential());
-            return client.DownloadCertificate(settings.CertificateName);
+            SecretClient client = new SecretClient(new Uri(KeyVaultUrl), new DefaultAzureCredential());
+            return client.GetSecret(settings.SecretName).Value;
         }
     }
 }

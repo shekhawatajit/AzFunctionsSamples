@@ -3,23 +3,22 @@ using Microsoft.Azure.WebJobs;
 using Azure.Storage.Queues;
 using Microsoft.Extensions.Logging;
 using Microsoft.Graph;
-using PnP.Core.Services;
-using PnP.Core.Model.SharePoint;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
-using PnP.Core.QueryModel;
-
-namespace Onrocks.SharePoint
+using PnP.Framework;
+using Microsoft.SharePoint.Client;
+namespace Adidas.OIP
 {
     public class CreateTeams
     {
         // private readonly AzureFunctionSettings azureFunctionSettings;
-        private readonly IPnPContextFactory pnpContextFactory;
+        private readonly AzureFunctionSettings azureFunctionSettings;
+
         private readonly GraphServiceClient graphClient;
-        public CreateTeams(IPnPContextFactory pnpContextFactory, GraphServiceClient graphServiceClient)
+        public CreateTeams(AzureFunctionSettings settings, GraphServiceClient graphServiceClient)
         {
-            this.pnpContextFactory = pnpContextFactory;
+            this.azureFunctionSettings = settings;
             this.graphClient = graphServiceClient;
         }
 
@@ -32,7 +31,7 @@ namespace Onrocks.SharePoint
             string ProjectTitle, ProjectDescription, ProjectRequestor;
             try
             {
-                using (var pnpContext = pnpContextFactory.Create(new Uri(info.RequestSPSiteUrl)))
+                using (var pnpContext = new AuthenticationManager().GetACSAppOnlyContext(info.RequestSPSiteUrl, azureFunctionSettings.ClientId, azureFunctionSettings.ClientSecret))
                 {
                     //Reading data from SharePoint list
                     GetProjectRequestDetails(info, out ProjectTitle, out ProjectDescription, out ProjectRequestor, pnpContext);
@@ -54,28 +53,23 @@ namespace Onrocks.SharePoint
             }
         }
 
-        private void UpdateSpList(string ProjectTitle, string ProjectRequestor, PnPContext pnpContext)
+        private void UpdateSpList(string ProjectTitle, string ProjectRequestor, ClientContext pnpContext)
         {
             Guid MailListId = Guid.Parse(Environment.GetEnvironmentVariable("MailListId"));
+            var mailList = pnpContext.Web.Lists.GetById(MailListId);
 
-            IList mailList = pnpContext.Web.Lists.GetById(MailListId, p => p.Title,
-                                                                    p => p.Fields.QueryProperties(p => p.InternalName,
-                                                                                                  p => p.FieldTypeKind,
-                                                                                                  p => p.TypeAsString,
-                                                                                                  p => p.Title));
+            //Item creation information
+            var itemCreateInfo = new ListItemCreationInformation();
+            var addedItem = mailList.AddItem(itemCreateInfo);
+            addedItem["Title"] = $"Project Request {ProjectTitle}";
+            addedItem["Status"] = "Request Accespted, Teams created";
 
-            // Load Field
-            IField userfield = mailList.Fields.Where(f => f.InternalName == "Receiver").FirstOrDefault()!;
-
-            Dictionary<string, object> values = new Dictionary<string, object>
-            {
-                { "Title", $"Project Request {ProjectTitle}" },
-                { "Status", "Request Accespted, Teams created"}
-            };
-            var Receiver = pnpContext.Web.EnsureUser(ProjectRequestor);
-            values.Add("Receiver", userfield.NewFieldUserValue(Receiver));
-            var addedItem = mailList.Items.Add(values);
+            FieldUserValue[] users = new FieldUserValue[1];
+            FieldUserValue Receiver = FieldUserValue.FromUser(ProjectRequestor);
+            users[0] = Receiver;
+            addedItem["Receiver"] = users;
             addedItem.Update();
+            pnpContext.ExecuteQuery();
         }
 
 
@@ -120,14 +114,12 @@ namespace Onrocks.SharePoint
             theQueue.SendMessage(System.Convert.ToBase64String(itemInfoBytes));
         }
 
-        private void GetProjectRequestDetails(ProjectRequestInfo info, out string ProjectTitle, out string ProjectDescription, out string ProjectRequestor, PnPContext pnpContext)
+        private void GetProjectRequestDetails(ProjectRequestInfo info, out string ProjectTitle, out string ProjectDescription, out string ProjectRequestor, ClientContext pnpContext)
         {
-            IList list = pnpContext.Web.Lists.GetById(info.RequestListId);
-            IListItem requestDetails = list.Items.GetById(info.RequestListItemId,
-                    li => li.Title,
-                    li => li.All);
-            ProjectTitle = requestDetails.Title == null ? string.Empty : requestDetails.Title;
-            ProjectDescription = requestDetails["Description"] == null ? string.Empty : requestDetails["Description"].ToString()!;
+            var list = pnpContext.Web.Lists.GetById(info.RequestListId);
+            var requestDetails = list.GetItemById(info.RequestListItemId);
+            ProjectTitle = requestDetails.FieldValues["Title"] == null ? string.Empty : requestDetails.FieldValues["Title"].ToString();
+            ProjectDescription = requestDetails.FieldValues["Description"] == null ? string.Empty : requestDetails.FieldValues["Description"].ToString()!;
             ProjectRequestor = pnpContext.Web.GetUserById(info.RequestorId).UserPrincipalName;
         }
     }
