@@ -72,7 +72,7 @@ namespace Onrocks.SharePoint
                     Stream folderContentStream = await folderDocument.GetContentAsync();
                     StreamReader reader = new StreamReader(folderContentStream);
                     string folderjson = reader.ReadToEnd();
-                    FolderCreationInfo? folderInfo = JsonSerializer.Deserialize<FolderCreationInfo>(folderjson);
+                    FolderCreationInfo folderInfo = JsonSerializer.Deserialize<FolderCreationInfo>(folderjson);
 
                     // Working on Teams Site
                     using (var context = await pnpContextFactory.CreateAsync(new Uri(TeamSiteUrl)))
@@ -133,7 +133,7 @@ namespace Onrocks.SharePoint
             }
         }
 
-        private void CreateFolders(FolderCreationInfo? folderInfo, PnPContext NewSiteContext)
+        private void CreateFolders(FolderCreationInfo folderInfo, PnPContext NewSiteContext)
         {
             var folder = (NewSiteContext.Web.Lists.GetByTitle(folderInfo.LibraryName, p => p.RootFolder)).RootFolder;
 
