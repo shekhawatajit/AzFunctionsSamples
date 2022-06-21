@@ -8,7 +8,7 @@ using PnP.Core.Model.SharePoint;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
-using PnP.Core.QueryModel;
+
 
 namespace Onrocks.SharePoint
 {
@@ -44,7 +44,7 @@ namespace Onrocks.SharePoint
                     UpdateStep2Queue(info, newTeamId);
 
                     //Updating list item to send email to requestor
-                    UpdateSpList(ProjectTitle, ProjectRequestor, pnpContext);
+                   // UpdateSpList(ProjectTitle, ProjectRequestor, pnpContext);
                 }
             }
             catch (System.Exception err)
@@ -55,31 +55,7 @@ namespace Onrocks.SharePoint
             }
         }
 
-        private void UpdateSpList(string ProjectTitle, string ProjectRequestor, PnPContext pnpContext)
-        {
-            Guid MailListId = Guid.Parse(Environment.GetEnvironmentVariable("MailListId"));
-
-            IList mailList = pnpContext.Web.Lists.GetById(MailListId, p => p.Title,
-                                                                    p => p.Fields.QueryProperties(p => p.InternalName,
-                                                                                                  p => p.FieldTypeKind,
-                                                                                                  p => p.TypeAsString,
-                                                                                                  p => p.Title));
-
-            // Load Field
-            IField userfield = mailList.Fields.Where(f => f.InternalName == "Receiver").FirstOrDefault()!;
-
-            Dictionary<string, object> values = new Dictionary<string, object>
-            {
-                { "Title", $"Project Request {ProjectTitle}" },
-                { "Status", "Request Accespted, Teams created"}
-            };
-            var Receiver = pnpContext.Web.EnsureUser(ProjectRequestor);
-            values.Add("Receiver", userfield.NewFieldUserValue(Receiver));
-            var addedItem = mailList.Items.Add(values);
-            addedItem.Update();
-        }
-
-
+    
         private string NewTeams(string ProjectTitle, string ProjectDescription, string ProjectRequestor)
         {
             //Required Permission: Microsoft Graph -> Team.Create

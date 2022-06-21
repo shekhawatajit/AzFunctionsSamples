@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 namespace Onrocks.SharePoint
 {
     public class ProjectRequestInfo
@@ -11,5 +12,11 @@ namespace Onrocks.SharePoint
 #nullable enable
         public string? TeamsId { get; set; }
 #nullable disable
+    }
+
+    public class FolderCreationInfo
+    {
+        public string LibraryName { get; set; }
+        public List<string> Folders { get; set; }
     }
 }

@@ -11,6 +11,10 @@ using PnP.Framework.Provisioning.ObjectHandlers;
 using PnP.Framework.Provisioning.Providers.Xml;
 using Microsoft.SharePoint.Client;
 using System.Threading;
+using PnP.Core.QueryModel;
+using System.Linq;
+using System.Collections.Generic;
+using System.Text.Json;
 
 namespace Onrocks.SharePoint
 {
@@ -49,6 +53,10 @@ namespace Onrocks.SharePoint
                     IListItem requestDetails = list.Items.GetById(info.RequestListItemId,
                             li => li.Title,
                             li => li.All);
+                    var ProjectTitle = requestDetails.Title == null ? string.Empty : requestDetails.Title;
+                    var ProjectDescription = requestDetails["Description"] == null ? string.Empty : requestDetails["Description"].ToString()!;
+                    var ProjectRequestor = contextPrimaryHub.Web.GetUserById(info.RequestorId).UserPrincipalName;
+
 
                     //Reading Provisining Template
                     string templateUrl = string.Format("{0}{1}", contextPrimaryHub.Uri.PathAndQuery, Environment.GetEnvironmentVariable("ProvisioningTemplateXmlFileUrl"));
@@ -56,7 +64,15 @@ namespace Onrocks.SharePoint
                     // Download the template file as stream
                     Stream downloadedContentStream = await templateDocument.GetContentAsync();
                     var provisioningTemplate = XMLPnPSchemaFormatter.LatestFormatter.ToProvisioningTemplate(downloadedContentStream);
-                    log.LogInformation($"Template ID to apply :{provisioningTemplate.Id}");
+
+                    //Reading Folder information
+                    string folderInfoUrl = string.Format("{0}{1}", contextPrimaryHub.Uri.PathAndQuery, Environment.GetEnvironmentVariable("FolderInfojson"));
+                    IFile folderDocument = await contextPrimaryHub.Web.GetFileByServerRelativeUrlAsync(folderInfoUrl);
+                    // Download the template file as stream
+                    Stream folderContentStream = await folderDocument.GetContentAsync();
+                    StreamReader reader = new StreamReader(folderContentStream);
+                    string folderjson = reader.ReadToEnd();
+                    FolderCreationInfo? folderInfo = JsonSerializer.Deserialize<FolderCreationInfo>(folderjson);
 
                     // Working on Teams Site
                     using (var context = await pnpContextFactory.CreateAsync(new Uri(TeamSiteUrl)))
@@ -104,14 +120,53 @@ namespace Onrocks.SharePoint
                             };
                             web.ApplyProvisioningTemplate(provisioningTemplate, ptai);
                         }
+                        // Creating Folders
+                        CreateFolders(folderInfo, context);
                     }
+                    //Sending Email to Owner
+                    UpdateSpList(ProjectTitle, ProjectDescription, ProjectRequestor, TeamSiteUrl, contextPrimaryHub);
                 }
             }
-            catch (System.Exception err)
+            catch
             {
-                log.LogError(err.ToString());
-                throw err;
+                throw;
             }
+        }
+
+        private void CreateFolders(FolderCreationInfo? folderInfo, PnPContext NewSiteContext)
+        {
+            var folder = (NewSiteContext.Web.Lists.GetByTitle(folderInfo.LibraryName, p => p.RootFolder)).RootFolder;
+
+            foreach (string fld in folderInfo.Folders)
+            {
+                // Add a folder 
+                var subFolder = folder.Folders.Add(fld);
+            }
+        }
+        private void UpdateSpList(string ProjectTitle, string ProjectDescription, string ProjectRequestor, string TeamSiteUrl, PnPContext contextPrimaryHub)
+        {
+
+
+            Guid MailListId = Guid.Parse(Environment.GetEnvironmentVariable("MailListId"));
+            IList mailList = contextPrimaryHub.Web.Lists.GetById(MailListId, p => p.Title,
+                                                                    p => p.Fields.QueryProperties(p => p.InternalName,
+                                                                                                  p => p.FieldTypeKind,
+                                                                                                  p => p.TypeAsString,
+                                                                                                  p => p.Title));
+
+            // Load Field
+            IField userfield = mailList.Fields.Where(f => f.InternalName == "Receiver").FirstOrDefault()!;
+
+            Dictionary<string, object> values = new Dictionary<string, object>
+            {
+                { "Title", $"Project Request {ProjectTitle}" },
+                { "Status", "Request Accespted, Teams created"},
+                {"SharePoint Site Url", TeamSiteUrl}
+            };
+            var Receiver = contextPrimaryHub.Web.EnsureUser(ProjectRequestor);
+            values.Add("Receiver", userfield.NewFieldUserValue(Receiver));
+            var addedItem = mailList.Items.Add(values);
+            addedItem.Update();
         }
     }
 }
