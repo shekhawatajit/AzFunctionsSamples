@@ -57,7 +57,7 @@ namespace Onrocks.SharePoint
             {
                 log.LogError(err.ToString());
                 responseMessage = err.Message;
-                return new BadRequestObjectResult(responseMessage);
+                throw err;
             }
             return new OkObjectResult(responseMessage);
         }

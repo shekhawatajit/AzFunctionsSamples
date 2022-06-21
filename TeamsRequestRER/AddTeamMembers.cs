@@ -5,9 +5,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Graph;
 using PnP.Core.Services;
 using PnP.Core.Model.SharePoint;
-
+using System.Text.Json;
 using System.Collections.Generic;
-
+using System.Threading.Tasks;
 
 namespace Onrocks.SharePoint
 {
@@ -23,7 +23,7 @@ namespace Onrocks.SharePoint
         }
         [FunctionName("AddTeamMembers")]
         [FixedDelayRetry(5, "00:00:10")]
-        public void Run([QueueTrigger("%Step2QueueName%", Connection = "AzureWebJobsStorage")] string projectQueueItem, ILogger log)
+        public async Task Run([QueueTrigger("%Step2QueueName%", Connection = "AzureWebJobsStorage")] string projectQueueItem, ILogger log)
         {
             ProjectRequestInfo info = System.Text.Json.JsonSerializer.Deserialize<ProjectRequestInfo>(projectQueueItem);
             log.LogInformation($"Team members adding process started with data: {projectQueueItem}");
@@ -43,7 +43,9 @@ namespace Onrocks.SharePoint
                         foreach (IFieldUserValue user in (requestDetails["Owners"] as IFieldValueCollection)!.Values)
                         {
                             // Get the stored user lookup id value
+                            //requried Permission: Microsoft Graph -> User.Read.All
                             var upnUser = pnpContext.Web.GetUserById(user.LookupId).UserPrincipalName;
+
                             var objUser = string.Format("https://graph.microsoft.com/v1.0/users('{0}')", upnUser);
 
                             var TeamUser = new AadUserConversationMember
@@ -52,6 +54,8 @@ namespace Onrocks.SharePoint
                                 AdditionalData = new Dictionary<string, object>()
                                {{"user@odata.bind", objUser}}
                             };
+                            //var result = await graphClient.Teams[info.TeamsId].Members.Request().AddResponseAsync(TeamUser);
+                            //log.LogInformation(result.StatusCode.ToString());
                             Members.Add(TeamUser);
                         }
                     }
@@ -60,6 +64,7 @@ namespace Onrocks.SharePoint
                         foreach (IFieldUserValue user in (requestDetails["Members"] as IFieldValueCollection)!.Values)
                         {
                             // Get the stored user lookup id value
+                            //requried Permission: Microsoft Graph -> User.Read.All
                             var upnUser = pnpContext.Web.GetUserById(user.LookupId).UserPrincipalName;
                             var objUser = string.Format("https://graph.microsoft.com/v1.0/users('{0}')", upnUser);
 
@@ -69,11 +74,15 @@ namespace Onrocks.SharePoint
                                 AdditionalData = new Dictionary<string, object>()
                                {{"user@odata.bind", objUser}}
                             };
+                            //var result = await graphClient.Teams[info.TeamsId].Members.Request().AddResponseAsync(TeamUser);
+                            //log.LogInformation(result.StatusCode.ToString());
                             Members.Add(TeamUser);
                         }
                     }
                     //Required Permissions:'TeamMember.ReadWrite.All'
-                    graphClient.Teams[info.TeamsId].Members.Add(Members).Request().PostAsync();
+                    var response  = await graphClient.Teams[info.TeamsId].Members.Add(Members).Request().PostAsync();
+                    
+                    //log.LogInformation(response.CurrentPage.  .Content.ReadAsStringAsync());
 
                     //Sending Teams info and request info in Queue 2
                     UpdateStep3Queue(info);

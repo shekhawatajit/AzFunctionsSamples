@@ -51,6 +51,7 @@ namespace Onrocks.SharePoint
             {
                 log.LogInformation(err.Message);
                 log.LogInformation(err.StackTrace);
+                throw err;
             }
         }
 
@@ -81,6 +82,7 @@ namespace Onrocks.SharePoint
 
         private string NewTeams(string ProjectTitle, string ProjectDescription, string ProjectRequestor)
         {
+            //Required Permission: Microsoft Graph -> Team.Create
             var team = new Team
             {
                 Visibility = TeamVisibilityType.Private,
