@@ -160,8 +160,7 @@ namespace Onrocks.SharePoint
             Dictionary<string, object> values = new Dictionary<string, object>
             {
                 { "Title", $"Project Request {ProjectTitle}" },
-                { "Status", "Request Accespted, Teams created"},
-                {"SharePoint Site Url", TeamSiteUrl}
+                { "Status", $"Request Accespted, Teams created. SharePoint Site Url is {TeamSiteUrl}"}
             };
             var Receiver = contextPrimaryHub.Web.EnsureUser(ProjectRequestor);
             values.Add("Receiver", userfield.NewFieldUserValue(Receiver));
