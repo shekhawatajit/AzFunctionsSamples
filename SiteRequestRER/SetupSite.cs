@@ -166,14 +166,14 @@ namespace Onrocks.SharePoint
                 throw;
             }
         }
-        private void CreateFolders(FolderCreationInfo folderInfo, PnPContext newSiteContext)
+        private async void CreateFolders(FolderCreationInfo folderInfo, PnPContext newSiteContext)
         {
             var folder = (newSiteContext.Web.Lists.GetByTitle(folderInfo.LibraryName, p => p.RootFolder)).RootFolder;
 
             foreach (string fld in folderInfo.Folders)
             {
                 // Add a folder 
-                var subFolder = folder.Folders.Add(fld);
+                var subFolder = await folder.EnsureFolderAsync(fld);
             }
         }
         private void UpdateSpList(string ProjectTitle, string ProjectDescription, string ProjectRequestor, string TeamSiteUrl, PnPContext contextPrimaryHub)
