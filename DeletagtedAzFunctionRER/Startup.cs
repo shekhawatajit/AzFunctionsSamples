@@ -27,7 +27,7 @@ namespace PnP.Framework.RER.Functions
                 var sharepointCreds = new SharePointAppCreds();
 
                 sharepointCreds.ClientId = azureFunctionSettings.SPClientId;
-                sharepointCreds.ClientSecret = LoadSecret(azureFunctionSettings.SPSecretName, azureFunctionSettings.KeyVaultName).Value;;
+                sharepointCreds.ClientSecret = LoadSecret(azureFunctionSettings.KeyVaultName, azureFunctionSettings.SPSecretName).Value;
                 return sharepointCreds;
             });
  

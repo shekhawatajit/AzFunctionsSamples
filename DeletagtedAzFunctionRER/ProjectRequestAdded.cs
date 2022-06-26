@@ -13,15 +13,29 @@ using PnP.Framework.RER.Common.EventReceivers;
 using System.Linq;
 using Microsoft.SharePoint.Client;
 using System.Net;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+using PnP.Framework.RER.Common.Model;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Security;
 
 namespace PnP.Framework.RER.Functions
 {
     public class ProjectRequestAdded
     {
+        private readonly HttpClient _client;
+        private readonly AzureFunctionSettings _azureFunctionSettings;
+        private readonly SharePointAppCreds _sharepointCreds;
         private readonly TokenManagerFactory _tokenManagerFactory;
-
-        public ProjectRequestAdded(TokenManagerFactory tokenManagerFactory)
+        public ProjectRequestAdded(IHttpClientFactory httpClientFactory, AzureFunctionSettings azureFunctionSettings, SharePointAppCreds sharepointCreds, TokenManagerFactory tokenManagerFactory)
         {
+            this._client = httpClientFactory.CreateClient();
+            _azureFunctionSettings = azureFunctionSettings;
+            _sharepointCreds = sharepointCreds;
             _tokenManagerFactory = tokenManagerFactory;
         }
 
@@ -41,17 +55,19 @@ namespace PnP.Framework.RER.Functions
                 }
 
                 var payload = eventRoot.FirstNode.ToString();
+
                 var eventProperties = SerializerHelper.Deserialize<SPRemoteEventProperties>(payload);
-
-                log.LogInformation(req.Host.Host);
-
                 var host = req.Host.Host;
 
-                var tokenManager = _tokenManagerFactory.Create(eventProperties, host);
+                //var tokenManager = _tokenManagerFactory.Create(eventProperties, host);
+                var tokenManager = new TokenManager(_sharepointCreds, _client, eventProperties.ContextToken, host);
 
                 var context = await tokenManager.GetUserClientContextAsync(eventProperties.ItemEventProperties.WebUrl);
                 context.Load(context.Web);
+
                 await context.ExecuteQueryRetryAsync();
+
+                log.LogInformation(context.Web.Title);
 
                 if (eventRoot.Name.LocalName == "ProcessEvent")
                 {
@@ -89,12 +105,6 @@ namespace PnP.Framework.RER.Functions
             switch (properties.EventType)
             {
                 case SPRemoteEventType.ItemAdding:
-                    {
-                        context.Load(context.Web, p => p.Title);
-                        context.ExecuteQueryRetry();
-                        log.LogInformation(context.Web.Title);
-                        break;
-                    }
                 //etc
                 default: { break; }
             }
@@ -114,13 +124,16 @@ namespace PnP.Framework.RER.Functions
         // -ed events, i.e. ItemAdded
         private async Task<IActionResult> ProcessAsyncEvent(SPRemoteEventProperties properties, ClientContext context, ILogger log)
         {
+            log.LogInformation("ProcessAsyncEvent");
             switch (properties.EventType)
             {
                 case SPRemoteEventType.ItemAdded:
-                    {
-                        // do things
-                        break;
-                    }
+
+                    context.Load(context.Web, p => p.Title);
+                    context.ExecuteQueryRetry();
+                    log.LogInformation(context.Web.Title);
+                    break;
+
                 //etc
                 default: { break; }
             }
