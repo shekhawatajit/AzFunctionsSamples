@@ -1,0 +1,16 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "version": "1.15.0",
+    "libraryName": "spfx-azurefunction",
+    "libraryId": "0bbdb6a5-4613-4e0f-9fcf-8422833d07af",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "spfx-azurefunction",
+    "solutionShortDescription": "spfx-azurefunction description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}

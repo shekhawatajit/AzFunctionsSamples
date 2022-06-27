@@ -1,0 +1,22 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
+  "id": "d62077dc-0b6e-4877-95a3-7a1a85184f9e",
+  "alias": "ItemCreatorWebPart",
+  "componentType": "WebPart",
+  "version": "*",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart", "TeamsPersonalApp", "TeamsTab", "SharePointFullPage"],
+  "supportsThemeVariants": true,
+
+  "preconfiguredEntries": [{
+    "groupId": "5c03119e-3074-46fd-976b-c60198311f70", 
+    "group": { "default": "Other" },
+    "title": { "default": "Project Request Creator" },
+    "description": { "default": "ItemCreator description" },
+    "officeFabricIconFontName": "NewTeamProject",
+    "properties": {
+      "description": "Raise a new project reuqest."
+    }
+  }]
+}
