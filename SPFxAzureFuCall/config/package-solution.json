@@ -3,14 +3,18 @@
   "solution": {
     "name": "spfx-azurefunction-client-side-solution",
     "id": "0bbdb6a5-4613-4e0f-9fcf-8422833d07af",
-    "version": "1.0.0.0",
+    "version": "1.0.0.2",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
     "webApiPermissionRequests": [
       {
-        "resource": "api://6c677d39-46c2-4848-93b0-2973cb4d0a72",
+        "resource": "OIP API",
         "scope": "user_impersonation"
+      },
+      {
+        "resource": "Windows Azure Active Directory",
+        "scope": "User.Read"
       }],
     "developer": {
       "name": "",

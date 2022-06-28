@@ -18,27 +18,50 @@ using System.Security;
 using PnP.Core.Auth;
 using PnP.Framework;
 using Microsoft.Graph;
+using System.Collections.Generic;
+using PnP.Core.QueryModel;
+
 namespace SimplifiedDelegatedRER
 {
+     public class ListData
+    {
+        public string Title { get; set; }
+    }
     public class ProjectRequestAdded
     {
-        private readonly HttpClient _client;
         private readonly AzureFunctionSettings _functionSettings;
         private ProjectRequestInfo _info = new ProjectRequestInfo();
         private readonly IPnPContextFactory _pnpContextFactory;
-        public ProjectRequestAdded(IHttpClientFactory httpClientFactory, AzureFunctionSettings azureFunctionSettings, IPnPContextFactory pnpContextFactory)
+        public ProjectRequestAdded(AzureFunctionSettings azureFunctionSettings, IPnPContextFactory pnpContextFactory)
         {
-            this._client = httpClientFactory.CreateClient();
             _functionSettings = azureFunctionSettings;
             this._pnpContextFactory = pnpContextFactory;
         }
 
         [FunctionName("ProjectRequestAdded")]
-        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req, ILogger log)
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "ProjectRequestAdded")] HttpRequestMessage request, ILogger log)
         {
             log.LogInformation("Item Added HTTP trigger function processed a request.");
-            var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            string responseMessage = "This HTTP triggered function executed successfully.";
+            var query = request.RequestUri.ParseQueryString();
+            var siteUrl = query["siteUrl"];
+            var tenantId = query["tenantId"];
+            var secretKV = LoadSecret(_functionSettings.KeyVaultName, _functionSettings.SecretName);
+            var clientSecret = new SecureString();
+
+            foreach (char c in secretKV) clientSecret.AppendChar(c);
+
+            var onBehalfAuthProvider = new OnBehalfOfAuthenticationProvider(_functionSettings.ClientId, tenantId, clientSecret, () => request.Headers.Authorization.Parameter);
+            var results = new List<ListData>();
+            using (var pnpContext = await _pnpContextFactory.CreateAsync(new System.Uri(siteUrl), onBehalfAuthProvider))
+            {
+                await pnpContext.Web.Lists.LoadAsync(l => l.Id, l => l.Title);
+                foreach (var list in pnpContext.Web.Lists.AsRequested())
+                {
+                    results.Add(new ListData { Title = list.Title });
+                }
+            }
+            /*var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            
             try
             {
                 XmlDocument xmlDoc = new XmlDocument();
@@ -95,8 +118,8 @@ namespace SimplifiedDelegatedRER
             {
                 log.LogError(err.ToString());
                 responseMessage = err.Message;
-            }
-            return new OkObjectResult(responseMessage);
+            }*/
+            return new JsonResult(results);
         }
         private string LoadSecret(string KeyVaultName, string SecretName)
         {

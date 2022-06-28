@@ -1,9 +1,9 @@
-import { AadHttpClientFactory } from '@microsoft/sp-http';
+import { WebPartContext } from "@microsoft/sp-webpart-base";
+
 export interface IItemCreatorProps {
-  description: string;
-  isDarkTheme: boolean;
-  environmentMessage: string;
+  context: WebPartContext;
   hasTeamsContext: boolean;
-  userDisplayName: string; 
-  aadFactory: AadHttpClientFactory;
+}
+export interface IItemCreatorState {
+  DataItems: any[];
 }

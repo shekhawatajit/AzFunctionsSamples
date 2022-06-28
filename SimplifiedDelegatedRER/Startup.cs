@@ -10,7 +10,6 @@ namespace SimplifiedDelegatedRER
     {
         public override void Configure(IFunctionsHostBuilder builder)
         {
-            builder.Services.AddHttpClient();
             var azureFunctionSettings = new AzureFunctionSettings();
             builder.Services.AddSingleton(option =>
             {
