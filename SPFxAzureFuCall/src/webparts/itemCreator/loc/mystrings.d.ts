@@ -1,11 +1,13 @@
 declare interface IItemCreatorWebPartStrings {
   PropertyPaneDescription: string;
   BasicGroupName: string;
-  DescriptionFieldLabel: string;
+  ListTitleFieldLabel: string;
   AppLocalEnvironmentSharePoint: string;
   AppLocalEnvironmentTeams: string;
   AppSharePointEnvironment: string;
   AppTeamsTabEnvironment: string;
+  ClientIDFieldLabel: string;
+  apiUrlFieldLabel: string;
 }
 
 declare module 'ItemCreatorWebPartStrings' {

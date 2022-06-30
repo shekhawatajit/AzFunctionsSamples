@@ -16,7 +16,9 @@
     "description": { "default": "ItemCreator description" },
     "officeFabricIconFontName": "NewTeamProject",
     "properties": {
-      "description": "Raise a new project reuqest."
+      "ListTitle": "Project Request",
+      "ClientID": "87b09524-2d48-4bd6-bf02-642eccfe5c1b",
+      "apiUrl": "https://samdel-functionapp.azurewebsites.net/api/ProjectRequestAdded"
     }
   }]
 }

@@ -4,26 +4,19 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Xml;
-using SimplifiedDelegatedRER.ToeknHelper;
 using System.Net.Http;
 using Azure.Security.KeyVault.Secrets;
 using Azure.Identity;
 using PnP.Core.Services;
 using System.Security;
 using PnP.Core.Auth;
-using PnP.Framework;
 using Microsoft.Graph;
-using System.Collections.Generic;
-using PnP.Core.QueryModel;
+using
 
 namespace SimplifiedDelegatedRER
 {
-     public class ListData
+    public class ListData
     {
         public string Title { get; set; }
     }
@@ -39,27 +32,40 @@ namespace SimplifiedDelegatedRER
         }
 
         [FunctionName("ProjectRequestAdded")]
-        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = "ProjectRequestAdded")] HttpRequestMessage request, ILogger log)
+        public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "ProjectRequestAdded")] HttpRequestMessage request, ILogger log)
         {
             log.LogInformation("Item Added HTTP trigger function processed a request.");
-            var query = request.RequestUri.ParseQueryString();
-            var siteUrl = query["siteUrl"];
-            var tenantId = query["tenantId"];
+
+            //Processing request body
+            ProjectRequestInfo info = new ProjectRequestInfo();
+            dynamic data = JsonConvert.DeserializeObject(request.Content.ReadAsStringAsync().Result);
+            log.LogInformation(request.Content.ReadAsStringAsync().Result);
+            info.RequestListItemId = data?.RequestListItemId;
+            info.RequestorId = data?.RequestorId;
+            //Creating PnP.Core context using clientid and client secret with user imperssionation
             var secretKV = LoadSecret(_functionSettings.KeyVaultName, _functionSettings.SecretName);
             var clientSecret = new SecureString();
-
             foreach (char c in secretKV) clientSecret.AppendChar(c);
-
-            var onBehalfAuthProvider = new OnBehalfOfAuthenticationProvider(_functionSettings.ClientId, tenantId, clientSecret, () => request.Headers.Authorization.Parameter);
-            var results = new List<ListData>();
-            using (var pnpContext = await _pnpContextFactory.CreateAsync(new System.Uri(siteUrl), onBehalfAuthProvider))
+            var onBehalfAuthProvider = new OnBehalfOfAuthenticationProvider(_functionSettings.ClientId, _functionSettings.TenantId, clientSecret, () => request.Headers.Authorization.Parameter);
+            using (PnPContext pnpCoreContext = await _pnpContextFactory.CreateAsync(new System.Uri(_functionSettings.HubSite), onBehalfAuthProvider))
             {
-                await pnpContext.Web.Lists.LoadAsync(l => l.Id, l => l.Title);
-                foreach (var list in pnpContext.Web.Lists.AsRequested())
+                //Creating Graph Client
+                var graphServiceClient = new GraphServiceClient(new DelegateAuthenticationProvider((requestMessage) =>
                 {
-                    results.Add(new ListData { Title = list.Title });
-                }
+                    return pnpCoreContext.AuthenticationProvider.AuthenticateRequestAsync(new Uri("https://graph.microsoft.com"), requestMessage);
+                }));
+
+                //Creating Teams
+                TeamsHelper tm = new TeamsHelper(pnpCoreContext, graphServiceClient, log);
+                info.TeamsId = tm.CreateTeams(info);
+
             }
+
+            /* 
+             var query = request.RequestUri.ParseQueryString();
+             var siteUrl = query["siteUrl"];
+             var tenantId = query["tenantId"];
+ */
             /*var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             
             try
@@ -119,7 +125,7 @@ namespace SimplifiedDelegatedRER
                 log.LogError(err.ToString());
                 responseMessage = err.Message;
             }*/
-            return new JsonResult(results);
+            return new JsonResult(info);
         }
         private string LoadSecret(string KeyVaultName, string SecretName)
         {

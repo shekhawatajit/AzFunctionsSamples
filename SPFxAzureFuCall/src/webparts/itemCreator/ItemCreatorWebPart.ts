@@ -9,8 +9,11 @@ import * as strings from 'ItemCreatorWebPartStrings';
 import ItemCreator from './components/ItemCreator';
 import { IItemCreatorProps } from './components/IItemCreatorProps';
 
+
 export interface IItemCreatorWebPartProps {
-  description: string;
+  ListTitle: string;
+  ClientID: string;
+  apiUrl: string;
 }
 
 export default class ItemCreatorWebPart extends BaseClientSideWebPart<IItemCreatorWebPartProps> {
@@ -23,19 +26,22 @@ export default class ItemCreatorWebPart extends BaseClientSideWebPart<IItemCreat
       ItemCreator,
       {
         context: this.context,
-        hasTeamsContext: !!this.context.sdks.microsoftTeams
+        hasTeamsContext: !!this.context.sdks.microsoftTeams,
+        ListTitle: this.properties.ListTitle,
+        ClientID: this.properties.ClientID,
+        apiUrl: this.properties.apiUrl,
       }
     );
 
     ReactDom.render(element, this.domElement);
   }
 
-  protected onInit(): Promise<void> {
+  protected async onInit(): Promise<void> {
     this._environmentMessage = this._getEnvironmentMessage();
     if (!Providers.globalProvider) {
       Providers.globalProvider = new SharePointProvider(this.context);
     }
-    return super.onInit();
+    await super.onInit();
   }
 
   private _getEnvironmentMessage(): string {
@@ -83,9 +89,9 @@ export default class ItemCreatorWebPart extends BaseClientSideWebPart<IItemCreat
             {
               groupName: strings.BasicGroupName,
               groupFields: [
-                PropertyPaneTextField('description', {
-                  label: strings.DescriptionFieldLabel
-                })
+                PropertyPaneTextField('ListTitle', { label: strings.ListTitleFieldLabel }),
+                PropertyPaneTextField('ClientID', { label: strings.ClientIDFieldLabel }),
+                PropertyPaneTextField('apiUrl', { label: strings.apiUrlFieldLabel })
               ]
             }
           ]

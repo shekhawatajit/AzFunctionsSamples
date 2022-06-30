@@ -12,20 +12,20 @@ using System.Linq;
 
 namespace SimplifiedDelegatedRER
 {
-    public class Teams
+    public class TeamsHelper
     {
         // private readonly AzureFunctionSettings azureFunctionSettings;
         private readonly PnPContext _pnpContext;
         private readonly GraphServiceClient _graphClient;
         private readonly ILogger _log;
-        public Teams(PnPContext pnpContext, GraphServiceClient graphServiceClient, ILogger log)
+        public TeamsHelper(PnPContext pnpContext, GraphServiceClient graphServiceClient, ILogger log)
         {
             this._pnpContext = pnpContext;
             this._graphClient = graphServiceClient;
             this._log = log;
         }
 
-        public ProjectRequestInfo CreateTeams(ProjectRequestInfo info)
+        public string CreateTeams(ProjectRequestInfo info)
         {
 
             _log.LogInformation("Team creation process started");
@@ -37,10 +37,8 @@ namespace SimplifiedDelegatedRER
                 GetProjectRequestDetails(info, out ProjectTitle, out ProjectDescription, out ProjectRequestor);
 
                 //Creating Teams (This is step 1/3)
-                info.TeamsId = NewTeams(ProjectTitle, ProjectDescription, ProjectRequestor);
-
-                //Sending Teams info and request info in Queue 2
-               return info;
+                return NewTeams(ProjectTitle, ProjectDescription, ProjectRequestor);
+               
             }
             catch (System.Exception err)
             {

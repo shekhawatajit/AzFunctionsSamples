@@ -3,8 +3,14 @@ import styles from './ItemCreator.module.scss';
 import { IItemCreatorProps, IItemCreatorState } from './IItemCreatorProps';
 import { escape } from '@microsoft/sp-lodash-subset';
 import { PeoplePicker } from '@microsoft/mgt-react/dist/es6/spfx';
-import { Label, TextField, CommandBar, ICommandBarItemProps, Stack, IStackTokens, StackItem, DefaultButton, PrimaryButton } from 'office-ui-fabric-react';
-import { AadHttpClient, HttpClientResponse } from '@microsoft/sp-http';
+import { Label, TextField, CommandBar, MessageBar, MessageBarType, FocusZone, FocusZoneDirection, ICommandBarItemProps, Stack, IStackTokens, StackItem, DefaultButton, PrimaryButton, FocusZoneTabbableElements, imgProperties } from 'office-ui-fabric-react';
+import { AadHttpClient, HttpClientResponse, IHttpClientOptions } from '@microsoft/sp-http';
+import { SPFI, spfi, SPFx } from "@pnp/sp";
+import "@pnp/sp/webs";
+import "@pnp/sp/lists";
+import "@pnp/sp/items";
+import "@pnp/sp/site-users/web";
+import { IItemAddResult } from "@pnp/sp/items";
 
 const verticalGapStackTokens: IStackTokens = {
   childrenGap: 10,
@@ -13,86 +19,144 @@ const verticalGapStackTokens: IStackTokens = {
 const stackTokens: IStackTokens = { childrenGap: 40 };
 
 export default class ItemCreator extends React.Component<IItemCreatorProps, IItemCreatorState> {
-  private _items: ICommandBarItemProps[] = [
-    { key: 'save', text: 'Save', onClick: () => this.saveProjectRequest(), iconProps: { iconName: 'Save' } },
-    { key: 'cancel', text: 'Cancel', onClick: () => console.log('Cancel'), iconProps: { iconName: 'Cancel' } },
-  ];
-  private LOG_SOURCE = "ProjectRequest";
-  private LIBRARY_NAME = "ProjectRequest3";
-
+  private sp: SPFI;
   constructor(props: IItemCreatorProps, state: IItemCreatorState) {
     super(props);
     // set initial state
     this.state = {
-      DataItems: []
+      Title: "",
+      Description: "",
+      Onwers: [],
+      Members: [],
+      Visitors: [],
+      Submitted: false,
     };
   }
 
-  private getData = async (): Promise<void> => {
-    console.dir(this.props.context.aadHttpClientFactory);
-    const client = await this.props.context.aadHttpClientFactory.getClient('87b09524-2d48-4bd6-bf02-642eccfe5c1b');
-    const siteUrl = this.props.context.pageContext.site.absoluteUrl;
-    const tenantId = this.props.context.pageContext.aadInfo.tenantId;
-    const results: any[] = await (await client.get(`https://samdel-functionapp.azurewebsites.net/api/ProjectRequestAdded?siteUrl=${siteUrl}&tenantId=${tenantId}`, AadHttpClient.configurations.v1)).json();
-    this.setState({ DataItems: results });
-  }
+  //this.setState({ DataItems: results });
+
   public render(): React.ReactElement<IItemCreatorProps> {
+    this.sp = spfi().using(SPFx({ pageContext: this.props.context.pageContext }));
     const {
       context,
       hasTeamsContext
     } = this.props;
-    if (!this.state.DataItems) {
-      return (
-        <div>Loading....</div>
-      );
-    }
-  
     return (
-      <div >
-        <PrimaryButton text="Save" onClick={() => this.getData()} allowDisabledFocus />
-        <div>Site lists:</div>
-        <ul>
-          {this.state.DataItems.map(l => (
-            <li>{l.title}</li>
-          ))}
-        </ul>
-      </div>
-    );
-   /* return (
       <section className={`${styles.itemCreator} ${hasTeamsContext ? styles.teams : ''}`}>
-        <CommandBar items={this._items} ariaLabel="Use left and right arrow keys to navigate between commands" />
         <Stack tokens={verticalGapStackTokens}>
           <Label className={styles.title}>Add new request</Label>
           <StackItem>
-            <TextField label="Title"
-              required description="Project title, It will be applied on project site." />
+            <TextField label="Title" value={this.state.Title} onChange={(e, newValue) => this.setState({ Title: newValue })}
+              description="Project title, It will be applied on project site." required />
+          </StackItem>
+          <StackItem>
+            <TextField label="Description" multiline value={this.state.Description} onChange={(e, newValue) => this.setState({ Description: newValue })}
+              description="Project description, It will be applied on project site." required />
           </StackItem>
           <StackItem>
             <Label htmlFor="OwnersPicker">Owners</Label>
-            <PeoplePicker id='OwnersPicker'></PeoplePicker>
+            <PeoplePicker id='OwnersPicker' selectionChanged={this.onOwnersChanged} placeholder='Select Owners'></PeoplePicker>
           </StackItem>
           <StackItem>
             <Label htmlFor="MembersPicker">Members</Label>
-            <PeoplePicker id='MembersPicker'></PeoplePicker>
+            <PeoplePicker id='MembersPicker' selectionChanged={this.onMembersChanged} placeholder='Select Members'></PeoplePicker>
           </StackItem>
           <StackItem>
             <Label htmlFor="VisitorsPicker">Visitors</Label>
-            <PeoplePicker id='VisitorsPicker'></PeoplePicker>
+            <PeoplePicker id='VisitorsPicker' selectionChanged={this.onVisitorsChanged} placeholder='Select Visitors'></PeoplePicker>
           </StackItem>
-          <StackItem>
-            <Label htmlFor="DescriptionField">Description</Label>
-            <TextField id="DescriptionField" multiline
-              required description="Project description, It will be applied on project site." />
-          </StackItem>
+          {(this.state.Title === '') && this.state.Submitted &&
+            <StackItem>
+              <MessageBar messageBarType={MessageBarType.error} isMultiline={false}    >
+                "Title" cannot be empty.
+              </MessageBar>
+            </StackItem>
+          }
+          {(this.state.Description === '') && this.state.Submitted &&
+            <StackItem>
+              <MessageBar messageBarType={MessageBarType.error} isMultiline={false}    >
+                "Description" cannot be empty.
+              </MessageBar>
+            </StackItem>
+          }
+          {(this.state.Onwers.length === 0) && this.state.Submitted &&
+            <StackItem>
+              <MessageBar messageBarType={MessageBarType.error} isMultiline={false}    >
+                "Owners" cannot be empty.
+              </MessageBar>
+            </StackItem>
+          }
+          {(this.state.Members.length === 0) && this.state.Submitted &&
+            <StackItem>
+              <MessageBar messageBarType={MessageBarType.error} isMultiline={false}    >
+                "Members" cannot be empty.
+              </MessageBar>
+            </StackItem>
+          }
           <Stack horizontal tokens={stackTokens}>
             <PrimaryButton text="Save" onClick={() => this.saveProjectRequest()} allowDisabledFocus />
             <DefaultButton text="Cancel" onClick={() => console.log('Cancel')} allowDisabledFocus />
           </Stack>
         </Stack>
       </section>
-    );*/
+    );
+  }
+
+  private onOwnersChanged = async (e: any): Promise<void> => {
+    let selusers: number[] = [];
+    if (e.detail && e.detail.length > 0) {
+      e.detail.map(async user => {
+        var Result = await this.sp.web.ensureUser(user.userPrincipalName);
+        selusers.push(Result.data.Id);
+      });
+    }
+    this.setState({ Onwers: selusers });
+  }
+  private onMembersChanged = async (e: any): Promise<void> => {
+    let selusers: number[] = [];
+    if (e.detail && e.detail.length > 0) {
+      e.detail.map(async user => {
+        var Result = await this.sp.web.ensureUser(user.userPrincipalName);
+        selusers.push(Result.data.Id);
+      });
+    }
+    this.setState({ Members: selusers });
+  }
+  private onVisitorsChanged = async (e: any): Promise<void> => {
+    let selusers: number[] = [];
+    if (e.detail && e.detail.length > 0) {
+      e.detail.map(async user => {
+        var Result = await this.sp.web.ensureUser(user.userPrincipalName);
+        selusers.push(Result.data.Id);
+      });
+    }
+    this.setState({ Visitors: selusers });
   }
 
   private saveProjectRequest = async (): Promise<void> => {
+    this.setState({Submitted: true});
+    if (this.state.Title == '' || this.state.Description =='' || this.state.Onwers.length === 0 || this.state.Members.length === 0) {
+      return;
+    }
+    // add an item to the list
+    // *** WARNING ***Append 'Id' on User Field internal Name otherwise api will not work
+    const iar: IItemAddResult = await this.sp.web.lists.getByTitle(this.props.ListTitle).items.add({
+      Title: this.state.Title,
+      Description: this.state.Description,
+      OwnersId: this.state.Onwers,
+      MembersId: this.state.Members,
+      VisitorsId: this.state.Visitors
+    });
+    console.log(iar.data.Id);
+    const client = await this.props.context.aadHttpClientFactory.getClient(this.props.ClientID);
+    const bodyContent: string = JSON.stringify({
+      'RequestListItemId': iar.data.Id,
+      'RequestorId': iar.data.AuthorId
+    });
+    const httpClientOptions: IHttpClientOptions = {
+      body: bodyContent,
+    };
+    const results: any[] = await (await client.post(this.props.apiUrl, AadHttpClient.configurations.v1, httpClientOptions)).json();
+    console.dir(results);
   }
 }
