@@ -14,6 +14,7 @@ export interface IItemCreatorWebPartProps {
   ListTitle: string;
   ClientID: string;
   apiUrl: string;
+  redirectUrl: string;
 }
 
 export default class ItemCreatorWebPart extends BaseClientSideWebPart<IItemCreatorWebPartProps> {
@@ -30,6 +31,7 @@ export default class ItemCreatorWebPart extends BaseClientSideWebPart<IItemCreat
         ListTitle: this.properties.ListTitle,
         ClientID: this.properties.ClientID,
         apiUrl: this.properties.apiUrl,
+        redirectUrl: this.properties.redirectUrl
       }
     );
 
@@ -91,7 +93,8 @@ export default class ItemCreatorWebPart extends BaseClientSideWebPart<IItemCreat
               groupFields: [
                 PropertyPaneTextField('ListTitle', { label: strings.ListTitleFieldLabel }),
                 PropertyPaneTextField('ClientID', { label: strings.ClientIDFieldLabel }),
-                PropertyPaneTextField('apiUrl', { label: strings.apiUrlFieldLabel })
+                PropertyPaneTextField('apiUrl', { label: strings.apiUrlFieldLabel }),
+                PropertyPaneTextField('redirectUrl', { label: strings.redirectUrlFieldLabel })
               ]
             }
           ]

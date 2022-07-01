@@ -1,6 +1,4 @@
 using System;
-using Microsoft.Azure.WebJobs;
-using Azure.Storage.Queues;
 using Microsoft.Extensions.Logging;
 using Microsoft.Graph;
 using PnP.Core.Services;
@@ -8,7 +6,6 @@ using PnP.Core.Model.SharePoint;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
-
 
 namespace SimplifiedDelegatedRER
 {
@@ -18,9 +15,9 @@ namespace SimplifiedDelegatedRER
         private readonly PnPContext _pnpContext;
         private readonly GraphServiceClient _graphClient;
         private readonly ILogger _log;
-        public TeamsHelper(PnPContext pnpContext, GraphServiceClient graphServiceClient, ILogger log)
+        public TeamsHelper(PnPContext hubContext, GraphServiceClient graphServiceClient, ILogger log)
         {
-            this._pnpContext = pnpContext;
+            this._pnpContext = hubContext;
             this._graphClient = graphServiceClient;
             this._log = log;
         }
@@ -30,25 +27,29 @@ namespace SimplifiedDelegatedRER
 
             _log.LogInformation("Team creation process started");
             string ProjectTitle, ProjectDescription, ProjectRequestor;
-            try
-            {
 
-                //Reading data from SharePoint list
-                GetProjectRequestDetails(info, out ProjectTitle, out ProjectDescription, out ProjectRequestor);
+            //Reading data from SharePoint list
+            GetProjectRequestDetails(info, out ProjectTitle, out ProjectDescription, out ProjectRequestor);
 
-                //Creating Teams (This is step 1/3)
-                return NewTeams(ProjectTitle, ProjectDescription, ProjectRequestor);
-               
-            }
-            catch (System.Exception err)
-            {
-                _log.LogInformation(err.Message);
-                _log.LogInformation(err.StackTrace);
-                throw err;
-            }
+            //Creating Teams (This is step 1/3)
+            info.TeamsId = NewTeams(ProjectTitle, ProjectDescription, ProjectRequestor);
+
+            //Adding Team Members 
+            AddTeamMembers(info);
+
+            return info.TeamsId;
+
         }
-
-
+        private void GetProjectRequestDetails(ProjectRequestInfo info, out string ProjectTitle, out string ProjectDescription, out string ProjectRequestor)
+        {
+            IList list = _pnpContext.Web.Lists.GetById(info.RequestListId);
+            IListItem requestDetails = list.Items.GetById(info.RequestListItemId,
+                    li => li.Title,
+                    li => li.All);
+            ProjectTitle = requestDetails.Title == null ? string.Empty : requestDetails.Title;
+            ProjectDescription = requestDetails["Description"] == null ? string.Empty : requestDetails["Description"].ToString()!;
+            ProjectRequestor = _pnpContext.Web.GetUserById(info.RequestorId).UserPrincipalName;
+        }
         private string NewTeams(string ProjectTitle, string ProjectDescription, string ProjectRequestor)
         {
             //Required Permission: Microsoft Graph -> Team.Create
@@ -78,28 +79,54 @@ namespace SimplifiedDelegatedRER
             }
             return newTeamId;
         }
-        private void UpdateStep2Queue(ProjectRequestInfo info, string newTeamId)
+        private async void AddTeamMembers(ProjectRequestInfo info)
         {
-            string connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
-            info.TeamsId = newTeamId;
-
-            //Sending New teams Id in next queue for step 2
-            var jsonString = Newtonsoft.Json.JsonConvert.SerializeObject(info);
-            string QueueName = Environment.GetEnvironmentVariable("Step2QueueName");
-            QueueClient theQueue = new QueueClient(connectionString, QueueName);
-            var itemInfoBytes = System.Text.Encoding.UTF8.GetBytes(jsonString);
-            theQueue.SendMessage(System.Convert.ToBase64String(itemInfoBytes));
-        }
-
-        private void GetProjectRequestDetails(ProjectRequestInfo info, out string ProjectTitle, out string ProjectDescription, out string ProjectRequestor)
-        {
+            var Members = new List<ConversationMember>();
             IList list = _pnpContext.Web.Lists.GetById(info.RequestListId);
             IListItem requestDetails = list.Items.GetById(info.RequestListItemId,
                     li => li.Title,
                     li => li.All);
-            ProjectTitle = requestDetails.Title == null ? string.Empty : requestDetails.Title;
-            ProjectDescription = requestDetails["Description"] == null ? string.Empty : requestDetails["Description"].ToString()!;
-            ProjectRequestor = _pnpContext.Web.GetUserById(info.RequestorId).UserPrincipalName;
+
+            if (requestDetails["Owners"] != null)
+            {
+                //log.LogInformation("");
+                foreach (IFieldUserValue user in (requestDetails["Owners"] as IFieldValueCollection)!.Values)
+                {
+                    // Get the stored user lookup id value
+                    //requried Permission: Microsoft Graph -> User.Read.All
+                    var upnUser = _pnpContext.Web.GetUserById(user.LookupId).UserPrincipalName;
+
+                    var objUser = string.Format("https://graph.microsoft.com/v1.0/users('{0}')", upnUser);
+
+                    var TeamUser = new AadUserConversationMember
+                    {
+                        Roles = new List<String>() { "owner" },
+                        AdditionalData = new Dictionary<string, object>()
+                               {{"user@odata.bind", objUser}}
+                    };
+                    Members.Add(TeamUser);
+                }
+            }
+            if (requestDetails["Members"] != null)
+            {
+                foreach (IFieldUserValue user in (requestDetails["Members"] as IFieldValueCollection)!.Values)
+                {
+                    // Get the stored user lookup id value
+                    //requried Permission: Microsoft Graph -> User.Read.All
+                    var upnUser = _pnpContext.Web.GetUserById(user.LookupId).UserPrincipalName;
+                    var objUser = string.Format("https://graph.microsoft.com/v1.0/users('{0}')", upnUser);
+
+                    var TeamUser = new AadUserConversationMember
+                    {
+                        Roles = new List<String>() { },
+                        AdditionalData = new Dictionary<string, object>()
+                               {{"user@odata.bind", objUser}}
+                    };
+                    Members.Add(TeamUser);
+                }
+            }
+            //Required Permissions:'TeamMember.ReadWrite.All'
+            var response = await _graphClient.Teams[info.TeamsId].Members.Add(Members).Request().PostAsync();
         }
     }
 }

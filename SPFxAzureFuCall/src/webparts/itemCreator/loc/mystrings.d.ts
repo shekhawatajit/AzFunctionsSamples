@@ -8,6 +8,7 @@ declare interface IItemCreatorWebPartStrings {
   AppTeamsTabEnvironment: string;
   ClientIDFieldLabel: string;
   apiUrlFieldLabel: string;
+  redirectUrlFieldLabel: string;
 }
 
 declare module 'ItemCreatorWebPartStrings' {

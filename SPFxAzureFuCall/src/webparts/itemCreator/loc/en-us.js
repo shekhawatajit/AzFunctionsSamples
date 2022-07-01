@@ -5,6 +5,7 @@ define([], function() {
     "ListTitleFieldLabel": "List Title",
     "ClientIDFieldLabel": "AAD App Client ID",
     "apiUrlFieldLabel": "Azure Function Url",
+    "redirectUrlFieldLabel": "Url to redirect after Save or Cancel",
     "AppLocalEnvironmentSharePoint": "The app is running on your local environment as SharePoint web part",
     "AppLocalEnvironmentTeams": "The app is running on your local environment as Microsoft Teams app",
     "AppSharePointEnvironment": "The app is running on SharePoint page",

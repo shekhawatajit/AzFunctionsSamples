@@ -1,0 +1,17 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "version": "1.15.0",
+    "libraryName": "project-request-form",
+    "libraryId": "cd192cf1-1caf-4f1f-94a9-62df4421bab2",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "project-request-form",
+    "solutionShortDescription": "project-request-form description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "extension",
+    "extensionType": "FormCustomizer"
+  }
+}

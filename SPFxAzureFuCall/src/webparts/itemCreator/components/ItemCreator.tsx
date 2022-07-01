@@ -1,10 +1,9 @@
 import * as React from 'react';
 import styles from './ItemCreator.module.scss';
 import { IItemCreatorProps, IItemCreatorState } from './IItemCreatorProps';
-import { escape } from '@microsoft/sp-lodash-subset';
 import { PeoplePicker } from '@microsoft/mgt-react/dist/es6/spfx';
-import { Label, TextField, CommandBar, MessageBar, MessageBarType, FocusZone, FocusZoneDirection, ICommandBarItemProps, Stack, IStackTokens, StackItem, DefaultButton, PrimaryButton, FocusZoneTabbableElements, imgProperties } from 'office-ui-fabric-react';
-import { AadHttpClient, HttpClientResponse, IHttpClientOptions } from '@microsoft/sp-http';
+import { Label, TextField, MessageBar, MessageBarType, Stack, IStackTokens, StackItem, DefaultButton, PrimaryButton } from 'office-ui-fabric-react';
+import { AadHttpClient, IHttpClientOptions } from '@microsoft/sp-http';
 import { SPFI, spfi, SPFx } from "@pnp/sp";
 import "@pnp/sp/webs";
 import "@pnp/sp/lists";
@@ -68,28 +67,28 @@ export default class ItemCreator extends React.Component<IItemCreatorProps, IIte
           {(this.state.Title === '') && this.state.Submitted &&
             <StackItem>
               <MessageBar messageBarType={MessageBarType.error} isMultiline={false}    >
-                "Title" cannot be empty.
+                Title cannot be empty.
               </MessageBar>
             </StackItem>
           }
           {(this.state.Description === '') && this.state.Submitted &&
             <StackItem>
               <MessageBar messageBarType={MessageBarType.error} isMultiline={false}    >
-                "Description" cannot be empty.
+                Description cannot be empty.
               </MessageBar>
             </StackItem>
           }
           {(this.state.Onwers.length === 0) && this.state.Submitted &&
             <StackItem>
               <MessageBar messageBarType={MessageBarType.error} isMultiline={false}    >
-                "Owners" cannot be empty.
+                Owners cannot be empty.
               </MessageBar>
             </StackItem>
           }
           {(this.state.Members.length === 0) && this.state.Submitted &&
             <StackItem>
               <MessageBar messageBarType={MessageBarType.error} isMultiline={false}    >
-                "Members" cannot be empty.
+                Members cannot be empty.
               </MessageBar>
             </StackItem>
           }
@@ -134,29 +133,39 @@ export default class ItemCreator extends React.Component<IItemCreatorProps, IIte
   }
 
   private saveProjectRequest = async (): Promise<void> => {
-    this.setState({Submitted: true});
-    if (this.state.Title == '' || this.state.Description =='' || this.state.Onwers.length === 0 || this.state.Members.length === 0) {
-      return;
+    this.setState({ Submitted: true });
+    if (this.state.Title == '' || this.state.Description == '' || this.state.Onwers.length === 0 || this.state.Members.length === 0) {
+       return;
     }
+    //Loading List 
+    const requestList = await this.sp.web.lists.getByTitle(this.props.ListTitle);
+    const requestListId = await requestList.select("Id")();
+    
     // add an item to the list
     // *** WARNING ***Append 'Id' on User Field internal Name otherwise api will not work
-    const iar: IItemAddResult = await this.sp.web.lists.getByTitle(this.props.ListTitle).items.add({
+    const iar: IItemAddResult = await requestList.items.add({
       Title: this.state.Title,
       Description: this.state.Description,
       OwnersId: this.state.Onwers,
       MembersId: this.state.Members,
       VisitorsId: this.state.Visitors
     });
-    console.log(iar.data.Id);
+    
+    //Calling Azure function
     const client = await this.props.context.aadHttpClientFactory.getClient(this.props.ClientID);
     const bodyContent: string = JSON.stringify({
       'RequestListItemId': iar.data.Id,
+      'RequestListId': requestListId.Id,
+      'RequestSPSiteUrl': this.props.context.pageContext.web.absoluteUrl,
       'RequestorId': iar.data.AuthorId
     });
     const httpClientOptions: IHttpClientOptions = {
       body: bodyContent,
     };
+    // Redirecting after save or cancel
     const results: any[] = await (await client.post(this.props.apiUrl, AadHttpClient.configurations.v1, httpClientOptions)).json();
-    console.dir(results);
+        if (this.props.redirectUrl !== '') {
+    //window.location.href = this.props.redirectUrl;
+    }
   }
 }

@@ -6,6 +6,7 @@ export interface IItemCreatorProps {
   ListTitle: string;
   ClientID: string;
   apiUrl: string;
+  redirectUrl: string;
 }
 export interface IItemCreatorState {
   Title: string;

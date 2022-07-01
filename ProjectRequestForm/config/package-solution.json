@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "project-request-form-client-side-solution",
+    "id": "cd192cf1-1caf-4f1f-94a9-62df4421bab2",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.15.0"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "project-request-form description"
+      },
+      "longDescription": {
+        "default": "project-request-form description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "project-request-form Feature",
+        "description": "The feature that activates elements of the project-request-form solution.",
+        "id": "0a82a956-5d6d-404b-b94c-c3d1878bf545",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/project-request-form.sppkg"
+  }
+}
