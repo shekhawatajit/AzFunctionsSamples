@@ -9,8 +9,10 @@ namespace SimplifiedDelegatedRER
         public int RequestorId { get; set; }
 #nullable enable
         public string? TeamsId { get; set; }
-        public string? SPSecret { get; set; }
-        public string? ContextToken { get; set; }
+        public string? ProjectTitle { get; set; }
+        public string? ProjectDescription { get; set; }
+        public string? ProjectRequestor { get; set; }
+        public string? ProjectSite { get; set; }
 
 #nullable disable
     }

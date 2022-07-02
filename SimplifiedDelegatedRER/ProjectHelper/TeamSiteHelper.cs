@@ -32,14 +32,10 @@ namespace SimplifiedDelegatedRER
             this._settings = functionSettings;
         }
 
-        public async void SetupTeamSite(ProjectRequestInfo info, PnPContext pnpProjectSiteContext, Utilities ut)
+        public async void SetupTeamSite(ProjectRequestInfo info, PnPContext pnpProjectSiteContext)
         {
-            //Get Teams site Url 
-            //requried Permission: SharePoint -> Sites.FullControl.All
-            var TeamSiteUrl = _graphClient.Groups[info.TeamsId].Sites["root"].Request().GetAsync().Result.WebUrl;
-            _log.LogInformation($"Teams site Url to process : {TeamSiteUrl}");
-
-            // Get the primary hub site details
+               _log.LogInformation($"Site setup started");
+             // Get the primary hub site details
             ISite primarySite = await contextPrimaryHub.Site.GetAsync(
                 p => p.HubSiteId,
                 p => p.IsHubSite);
@@ -104,8 +100,7 @@ namespace SimplifiedDelegatedRER
                 };
                 web.ApplyProvisioningTemplate(provisioningTemplate, ptai);
             }
-            //Sending Email to Owner
-            ut.UpdateSpList(_settings.OIPMailListId, ProjectTitle, ProjectDescription, ProjectRequestor, TeamSiteUrl, contextPrimaryHub);
+
         }
     }
 }

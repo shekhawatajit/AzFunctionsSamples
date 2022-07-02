@@ -11,15 +11,15 @@ namespace SimplifiedDelegatedRER
 
         #region OIP
         public string? OIPHubSite { get; set; }
-        public Guid OIPRequestListId { get; set; }
-        public Guid OIPMailListId { get; set; }
+        public string? OIPRequestListTitle { get; set; }
+        public string? OIPMailListTitle { get; set; }
         public string? OIPProvisioningTemplateXmlFileUrl { get; set; }
         #endregion
 
         #region Relation
         public string? RelationHubSite { get; set; }
-        public Guid RelationRequestListId { get; set; }
-        public Guid RelationMailListId { get; set; }
+        public string? RelationRequestListTitle { get; set; }
+        public string? RelationMailListTitle { get; set; }
         public string? RelationProvisioningTemplateXmlFileUrl { get; set; }
         #endregion
 #nullable disable

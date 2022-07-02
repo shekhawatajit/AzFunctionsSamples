@@ -22,42 +22,41 @@ namespace SimplifiedDelegatedRER
             this._log = log;
         }
 
-        public string CreateTeams(ProjectRequestInfo info)
+        public ProjectRequestInfo CreateTeams(ProjectRequestInfo info)
         {
 
             _log.LogInformation("Team creation process started");
-            string ProjectTitle, ProjectDescription, ProjectRequestor;
 
             //Reading data from SharePoint list
-            GetProjectRequestDetails(info, out ProjectTitle, out ProjectDescription, out ProjectRequestor);
+            GetProjectRequestDetails(info);
 
             //Creating Teams (This is step 1/3)
-            info.TeamsId = NewTeams(ProjectTitle, ProjectDescription, ProjectRequestor);
-
+            info.TeamsId = NewTeams(info);
+            System.Threading.Thread.Sleep(5000);
             //Adding Team Members 
             AddTeamMembers(info);
-
-            return info.TeamsId;
+            return info;
 
         }
-        private void GetProjectRequestDetails(ProjectRequestInfo info, out string ProjectTitle, out string ProjectDescription, out string ProjectRequestor)
+        private ProjectRequestInfo GetProjectRequestDetails(ProjectRequestInfo info)
         {
             IList list = _pnpContext.Web.Lists.GetById(info.RequestListId);
             IListItem requestDetails = list.Items.GetById(info.RequestListItemId,
                     li => li.Title,
                     li => li.All);
-            ProjectTitle = requestDetails.Title == null ? string.Empty : requestDetails.Title;
-            ProjectDescription = requestDetails["Description"] == null ? string.Empty : requestDetails["Description"].ToString()!;
-            ProjectRequestor = _pnpContext.Web.GetUserById(info.RequestorId).UserPrincipalName;
+            //info.ProjectTitle = requestDetails.Title == null ? string.Empty : requestDetails.Title;
+            info.ProjectDescription = requestDetails["Description"] == null ? string.Empty : requestDetails["Description"].ToString()!;
+            info.ProjectRequestor = _pnpContext.Web.GetUserById(info.RequestorId).UserPrincipalName;
+            return info;
         }
-        private string NewTeams(string ProjectTitle, string ProjectDescription, string ProjectRequestor)
+        private string NewTeams(ProjectRequestInfo info)
         {
             //Required Permission: Microsoft Graph -> Team.Create
             var team = new Team
             {
                 Visibility = TeamVisibilityType.Private,
-                DisplayName = ProjectTitle,
-                Description = ProjectDescription,
+                DisplayName = info.ProjectTitle,
+                Description = info.ProjectDescription,
                 AdditionalData = new Dictionary<string, object>() { { "template@odata.bind", "https://graph.microsoft.com/v1.0/teamsTemplates('standard')" } },
                 Members = new TeamMembersCollectionPage()
                 {
@@ -66,7 +65,7 @@ namespace SimplifiedDelegatedRER
                         Roles = new List<String>(){"owner"},
                         AdditionalData = new Dictionary<string, object>()
                         {
-                            {"user@odata.bind", "https://graph.microsoft.com/v1.0/users('" + ProjectRequestor + "')"}
+                            {"user@odata.bind", "https://graph.microsoft.com/v1.0/users('" + info.ProjectRequestor + "')"}
                         }
                     }
                 },

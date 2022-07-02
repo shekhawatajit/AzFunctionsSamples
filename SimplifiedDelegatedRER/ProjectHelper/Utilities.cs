@@ -16,9 +16,9 @@ namespace SimplifiedDelegatedRER
             SecretClient client = new SecretClient(new Uri(KeyVaultUrl), new DefaultAzureCredential());
             return client.GetSecret(SecretName).Value.Value;
         }
-        public void UpdateSpList(Guid MailListId, string ProjectTitle, string ProjectDescription, string ProjectRequestor, string TeamSiteUrl, PnPContext siteContext)
+        public void UpdateSpList(string MailListTitle, string ProjectTitle, string ProjectDescription, string ProjectRequestor, string TeamSiteUrl, PnPContext siteContext)
         {
-            IList mailList = siteContext.Web.Lists.GetById(MailListId, p => p.Title,
+            IList mailList = siteContext.Web.Lists.GetByTitle(MailListTitle, p => p.Title,
                                                                     p => p.Fields.QueryProperties(p => p.InternalName,
                                                                                                   p => p.FieldTypeKind,
                                                                                                   p => p.TypeAsString,

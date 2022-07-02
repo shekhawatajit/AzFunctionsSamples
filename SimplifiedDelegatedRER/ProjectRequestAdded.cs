@@ -20,6 +20,7 @@ namespace SimplifiedDelegatedRER
         private readonly AzureFunctionSettings _functionSettings;
         private ProjectRequestInfo _info = new ProjectRequestInfo();
         private readonly IPnPContextFactory _pnpContextFactory;
+        private Utilities ut = new Utilities();
         public ProjectRequestAdded(AzureFunctionSettings azureFunctionSettings, IPnPContextFactory pnpContextFactory)
         {
             _functionSettings = azureFunctionSettings;
@@ -33,7 +34,7 @@ namespace SimplifiedDelegatedRER
 
             //Processing request body
             ProjectRequestInfo info = JsonSerializer.Deserialize<ProjectRequestInfo>(request.Content.ReadAsStringAsync().Result);
-            Utilities ut = new Utilities();
+            info.ProjectTitle = string.Format("Protect {0}", info.RequestListItemId);
             //Creating PnP.Core context using clientid and client secret with user imperssionation
             var secretKV = ut.LoadSecret(_functionSettings.KeyVaultName, _functionSettings.SecretName);
             var clientSecret = new SecureString();
@@ -44,13 +45,47 @@ namespace SimplifiedDelegatedRER
                 //Creating Graph Client
                 var graphServiceClient = new GraphServiceClient(new DelegateAuthenticationProvider((requestMessage) =>
                 {
-                    return pnpCoreContext.AuthenticationProvider.AuthenticateRequestAsync(new Uri("https://graph.microsoft.com"), requestMessage);
+                    return pnpCoreContext.AuthenticationProvider.AuthenticateRequestAsync(new Uri("https://graph.microsoft.com/v1.0"), requestMessage);
                 }));
 
                 //Creating Teams
                 TeamsHelper tm = new TeamsHelper(pnpCoreContext, graphServiceClient, log);
-                info.TeamsId = tm.CreateTeams(info);
+                info = tm.CreateTeams(info);
                 TeamSiteHelper tspHelper = new TeamSiteHelper(pnpCoreContext, graphServiceClient, log, _functionSettings);
+
+
+                int maxRetry = 60;
+                string TeamSiteUrl = string.Empty;
+                //This retry to get SharePoint site url is VERY BAD but no other option left
+                for (int tryNumber = 1; tryNumber <= maxRetry; tryNumber++)
+                {
+                    try
+                    {
+                        //Get Teams site Url 
+                        //requried Permission: SharePoint -> Sites.FullControl.All
+                        TeamSiteUrl = graphServiceClient.Groups[info.TeamsId].Sites["root"].Request().GetAsync().Result.WebUrl;
+                        log.LogInformation($"Teams site Url to process : {TeamSiteUrl}");
+                        log.LogInformation($"Find Url in try number : {tryNumber}");
+                        // Breaking the loop on success
+                        break;
+
+                    }
+                    catch (System.Exception err)
+                    {
+                        System.Threading.Thread.Sleep(1000);
+                        log.LogInformation(err.Message);
+                    }
+                }
+                info.ProjectSite = TeamSiteUrl;
+                log.LogInformation($"Outside retry {info.ProjectSite}");
+                using (PnPContext pnpProjectContext = await _pnpContextFactory.CreateAsync(new System.Uri(info.ProjectSite), onBehalfAuthProvider))
+                {
+                    log.LogInformation($"Inside context {pnpProjectContext.ToString()}");
+                    tspHelper.SetupTeamSite(info, pnpProjectContext);
+                }
+                //Sending Email to Owner
+                ut.UpdateSpList(_functionSettings.OIPMailListTitle, info.ProjectTitle, info.ProjectDescription, info.ProjectRequestor, info.ProjectSite, pnpCoreContext);
+
             }
             return new OkObjectResult("OK");
         }

@@ -143,7 +143,7 @@ namespace SimplifiedDelegatedRER
                     }
                 }
                 //Sending Email to Owner
-                ut.UpdateSpList(_settings.RelationMailListId, ProjectTitle, ProjectDescription, ProjectRequestor, teamsSiteUrl, contextPrimaryHub);
+                ut.UpdateSpList(_settings.RelationMailListTitle, ProjectTitle, ProjectDescription, ProjectRequestor, teamsSiteUrl, contextPrimaryHub);
                 return teamsSiteUrl;
             }
             catch
