@@ -3,7 +3,7 @@
   "solution": {
     "name": "spfx-azurefunction-client-side-solution",
     "id": "0bbdb6a5-4613-4e0f-9fcf-8422833d07af",
-    "version": "1.0.0.4",
+    "version": "1.0.0.7",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
