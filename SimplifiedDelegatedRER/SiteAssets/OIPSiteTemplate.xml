@@ -1,27 +1,16 @@
 <?xml version="1.0"?>
 <pnp:Provisioning xmlns:pnp="http://schemas.dev.office.com/PnP/2021/03/ProvisioningSchema">
   <pnp:Preferences Generator="PnP.Framework, Version=1.9.1.0, Culture=neutral, PublicKeyToken=0d501f89f11b748c" />
-  <pnp:Templates ID="CONTAINER-OIPTeamsSiteTemplate">
-    <pnp:ProvisioningTemplate ID="OIPTeamsSiteTemplate" Version="1" BaseSiteTemplate="GROUP#0" Scope="RootSite">
-      <pnp:WebSettings RequestAccessEmail="" NoCrawl="false" WelcomePage="SitePages/Home.aspx" AlternateCSS="" MasterPageUrl="{masterpagecatalog}/seattle.master" CustomMasterPageUrl="{masterpagecatalog}/seattle.master" HubSiteUrl="" CommentsOnSitePagesDisabled="false" QuickLaunchEnabled="true" HorizontalQuickLaunch="true" SearchScope="DefaultScope" SearchBoxInNavBar="Inherit" />
-      <pnp:SiteSettings AllowDesigner="true" AllowCreateDeclarativeWorkflow="true" AllowSaveDeclarativeWorkflowAsTemplate="true" AllowSavePublishDeclarativeWorkflow="true" SearchBoxInNavBar="Inherit" SearchCenterUrl="" />
-      <pnp:RegionalSettings AdjustHijriDays="0" AlternateCalendarType="None" CalendarType="Gregorian" Collation="25" FirstDayOfWeek="Sunday" FirstWeekOfYear="0" LocaleId="1033" ShowWeeks="false" Time24="false" TimeZone="13" WorkDayEndHour="5:00PM" WorkDays="62" WorkDayStartHour="8:00AM" />
-      <pnp:PropertyBagEntries>
-        <pnp:PropertyBagEntry Key="ThemePrimary" Value="#03787C" Overwrite="false" Indexed="true" />
-        <pnp:PropertyBagEntry Key="UseFastCloneFromSiteMaster" Value="TRUE" Overwrite="false" />
-      </pnp:PropertyBagEntries>
-      <pnp:SiteFields>
-        <Field ID="{ef991a83-108d-4407-8ee5-ccc0c3d836b9}" Type="UserMulti" DisplayName="Shared With" Mult="TRUE" Name="SharedWithUsers" StaticName="SharedWithUsers" Group="_Hidden" Sealed="TRUE" AllowDeletion="FALSE" ReadOnly="TRUE" ShowInDisplayForm="FALSE" ShowInEditForm="FALSE" ShowInListSettings="FALSE" Viewable="FALSE" SourceID="{4bd86c48-3db8-4368-bcb2-49f489acfdb4}" />
-        <Field ID="{d3c9caf7-044c-4c71-ae64-092981e54b33}" Type="Note" DisplayName="Shared With Details" Name="SharedWithDetails" StaticName="SharedWithDetails" Group="_Hidden" Sealed="TRUE" AllowDeletion="FALSE" ReadOnly="TRUE" ShowInDisplayForm="FALSE" ShowInEditForm="FALSE" ShowInListSettings="FALSE" Viewable="FALSE" SourceID="{4bd86c48-3db8-4368-bcb2-49f489acfdb4}" />
-      </pnp:SiteFields>
+  <pnp:Templates ID="CONTAINER-TEMPLATE-OIP">
+    <pnp:ProvisioningTemplate ID="TEMPLATE-OIP" Version="1" BaseSiteTemplate="GROUP#0" Scope="RootSite">
       <pnp:Lists>
-        <pnp:ListInstance Title="Documents" Description="" DocumentTemplate="{site}/Shared Documents/Forms/template.dotx" TemplateType="101" Url="Shared Documents" MinorVersionLimit="0" MaxVersionLimit="0" DraftVersionVisibility="0" TemplateFeatureID="00bfea71-e717-4e80-aa17-d0c71b360101" EnableAttachments="false" DefaultDisplayFormUrl="{site}/Shared Documents/Forms/DispForm.aspx" DefaultEditFormUrl="{site}/Shared Documents/Forms/EditForm.aspx" DefaultNewFormUrl="{site}/Shared Documents/Forms/Upload.aspx" ImageUrl="/_layouts/15/images/itdl.png?rev=47" IrmExpire="false" IrmReject="false" IsApplicationList="false" ValidationFormula="" ValidationMessage="">
+        <pnp:ListInstance Title="Documents" Description="" DocumentTemplate="{site}/Shared Documents/Forms/template.dotx" OnQuickLaunch="true" TemplateType="101" Url="Shared Documents" EnableVersioning="true" MinorVersionLimit="0" MaxVersionLimit="500" DraftVersionVisibility="0" TemplateFeatureID="00bfea71-e717-4e80-aa17-d0c71b360101" EnableAttachments="false" ListExperience="NewExperience" DefaultDisplayFormUrl="{site}/Shared Documents/Forms/DispForm.aspx" DefaultEditFormUrl="{site}/Shared Documents/Forms/EditForm.aspx" DefaultNewFormUrl="{site}/Shared Documents/Forms/Upload.aspx" ImageUrl="/_layouts/15/images/itdl.png?rev=47" IrmExpire="false" IrmReject="false" IsApplicationList="false" ValidationFormula="" ValidationMessage="">
           <pnp:ContentTypeBindings>
             <pnp:ContentTypeBinding ContentTypeID="0x0101" Default="true" />
             <pnp:ContentTypeBinding ContentTypeID="0x0120" />
           </pnp:ContentTypeBindings>
           <pnp:Views>
-            <View Name="{B0BC66E8-EDE3-40E2-AB16-B98CA93CF97B}" DefaultView="TRUE" MobileView="TRUE" MobileDefaultView="TRUE" Type="HTML" DisplayName="All Documents" Url="{site}/Shared Documents/Forms/AllItems.aspx" Level="1" BaseViewID="1" ContentTypeID="0x" ImageUrl="/_layouts/15/images/dlicon.png?rev=47">
+            <View Name="{BB7386CC-0DAC-47AA-9B0F-BD86DEB196D3}" DefaultView="TRUE" MobileView="TRUE" MobileDefaultView="TRUE" Type="HTML" DisplayName="All Documents" Url="{site}/Shared Documents/Forms/AllItems.aspx" Level="1" BaseViewID="1" ContentTypeID="0x" ImageUrl="/_layouts/15/images/dlicon.png?rev=47">
               <Query>
                 <OrderBy>
                   <FieldRef Name="FileLeafRef" />
@@ -37,30 +26,71 @@
               <JSLink>clienttemplates.js</JSLink>
             </View>
           </pnp:Views>
-          <pnp:Fields>
-            <Field ID="{d1cff744-ba61-4189-94d6-97d0a9eb4f6a}" Type="Text" DisplayName="Tags" Name="MediaServiceAutoTags" Group="_Hidden" Hidden="FALSE" Sealed="TRUE" ReadOnly="TRUE" ShowInNewForm="FALSE" ShowInDisplayForm="FALSE" ShowInEditForm="FALSE" ShowInListSettings="FALSE" Viewable="FALSE" Json="FALSE" SourceID="{{listid:Documents}}" StaticName="MediaServiceAutoTags" ColName="nvarchar15" RowOrdinal="0" />
-            <Field ID="{67aff0cf-8e19-43f2-9987-be89075e1467}" Type="Note" DisplayName="Extracted Text" Name="MediaServiceOCR" Group="_Hidden" Hidden="FALSE" Sealed="TRUE" ReadOnly="TRUE" ShowInNewForm="FALSE" ShowInDisplayForm="FALSE" ShowInEditForm="FALSE" ShowInListSettings="FALSE" Viewable="FALSE" Json="FALSE" SourceID="{{listid:Documents}}" StaticName="MediaServiceOCR" ColName="ntext5" RowOrdinal="0" />
-            <Field ID="{5e0382d1-eb43-4590-a609-575845fa9af9}" Type="Text" DisplayName="Location" Name="MediaServiceLocation" Group="_Hidden" Hidden="FALSE" Sealed="TRUE" ReadOnly="TRUE" ShowInNewForm="FALSE" ShowInDisplayForm="FALSE" ShowInEditForm="FALSE" ShowInListSettings="FALSE" Viewable="FALSE" Json="FALSE" SourceID="{{listid:Documents}}" StaticName="MediaServiceLocation" ColName="nvarchar18" RowOrdinal="0" />
-            <Field ID="{585d452c-20a1-46f7-a0ef-3b6b035711db}" Type="Note" DisplayName="KeyPoints" Name="MediaServiceKeyPoints" Group="_Hidden" Hidden="FALSE" Sealed="TRUE" ReadOnly="TRUE" ShowInNewForm="FALSE" ShowInDisplayForm="FALSE" ShowInEditForm="FALSE" ShowInListSettings="FALSE" Viewable="FALSE" Json="FALSE" SourceID="{{listid:Documents}}" StaticName="MediaServiceKeyPoints" ColName="ntext8" RowOrdinal="0" />
-          </pnp:Fields>
           <pnp:FieldRefs>
-            <pnp:FieldRef ID="cb19284a-cde7-4570-a980-1dab8bd74470" Name="_ExtendedDescription" DisplayName="Description" />
-            <pnp:FieldRef ID="ef991a83-108d-4407-8ee5-ccc0c3d836b9" Name="SharedWithUsers" DisplayName="Shared With" />
-            <pnp:FieldRef ID="d3c9caf7-044c-4c71-ae64-092981e54b33" Name="SharedWithDetails" DisplayName="Shared With Details" />
             <pnp:FieldRef ID="d307dff3-340f-44a2-9f4b-fbfe1ba07459" Name="_CommentCount" DisplayName="Comment count" />
             <pnp:FieldRef ID="db8d9d6d-dc9a-4fbd-85f3-4a753bfdc58c" Name="_LikeCount" DisplayName="Like count" />
+            <pnp:FieldRef ID="cb19284a-cde7-4570-a980-1dab8bd74470" Name="_ExtendedDescription" DisplayName="Description" />
           </pnp:FieldRefs>
-          <pnp:Security>
-            <pnp:BreakRoleInheritance CopyRoleAssignments="false" ClearSubscopes="false">
-              <pnp:RoleAssignment Principal="{associatedownergroupid}" RoleDefinition="Full Control" />
-              <pnp:RoleAssignment Principal="{associatedvisitorgroupid}" RoleDefinition="Read" />
-              <pnp:RoleAssignment Principal="{associatedmembergroupid}" RoleDefinition="Edit" />
-              <pnp:RoleAssignment Principal="i:0#.f|membership|reuben.bligh@adidas.com" RoleDefinition="Read" />
-            </pnp:BreakRoleInheritance>
-          </pnp:Security>
-          <pnp:Webhooks>
-            <pnp:Webhook ServerNotificationUrl="https://westeurope1-0.pushnp.svc.ms/notifications?token=98dec3ca-e13b-42e9-91c7-d72d6ee7d2d7" ExpiresInDays="1" />
-          </pnp:Webhooks>
+          <pnp:Folders>
+            <pnp:Folder Name="00 Archive"/>
+            <pnp:Folder Name="01 Presentations">
+                <pnp:Folder Name="00 Archive"/>
+                <pnp:Folder Name="01 Product Roadmaps"/>
+                <pnp:Folder Name="02 Tech Creation"/>
+                <pnp:Folder Name="03 Strung Center HZO"/>
+                <pnp:Folder Name="04 Tech Gates"/>
+                <pnp:Folder Name="05 Tech Summits"/>
+                <pnp:Folder Name="06 Technology Roadmaps"/>
+            </pnp:Folder>
+            <pnp:Folder Name="02 Reports">
+                <pnp:Folder Name="00 Archive"/>
+                <pnp:Folder Name="01 Hardware">
+                    <pnp:Folder Name="00 Archive"/>
+                    <pnp:Folder Name="01 Winding"/>
+                    <pnp:Folder Name="02 Consolidation"/>
+                    <pnp:Folder Name="03 Cutting"/>
+                </pnp:Folder>
+                <pnp:Folder Name="02 Software">
+                    <pnp:Folder Name="01 Software Feedback"/>
+                    <pnp:Folder Name="02 Frame Creation"/>
+                </pnp:Folder>
+                <pnp:Folder Name="03 Product &#38; Material">
+                    <pnp:Folder Name="01 Creation Guidelines"/>
+                    <pnp:Folder Name="02 Testing"/>
+                </pnp:Folder>
+                <pnp:Folder Name="04 Yarns">
+                    <pnp:Folder Name="01 Roadmaps"/>
+                </pnp:Folder>
+                <pnp:Folder Name="05 Technology Exploration"/>
+                <pnp:Folder Name="06 Production">
+                    <pnp:Folder Name="01 FW22 Data"/>
+                    <pnp:Folder Name="02 SS23 Production Planning"/>
+                </pnp:Folder>
+                <pnp:Folder Name="07 Grading">
+                    <pnp:Folder Name="01 T1 - PATTERN"/>
+                    <pnp:Folder Name="02 Pattern Requirements"/>
+                    <pnp:Folder Name="03 Config Creation Guidelines"/>
+                    <pnp:Folder Name="04 FW23 Config Input"/>
+                    <pnp:Folder Name="05 FW24 Config Input"/>
+                </pnp:Folder>
+                <pnp:Folder Name="08 Sample Request"/>
+                <pnp:Folder Name="09 Costing"/>
+            </pnp:Folder>
+            <pnp:Folder Name="03 Learning Documents">
+                <pnp:Folder Name="01 Idea Generator"/>
+                <pnp:Folder Name="02 Technology Rollout Sourcing"/>
+            </pnp:Folder>
+            <pnp:Folder Name="04 Images and Pictures"/>
+            <pnp:Folder Name="05 Sampling"/>
+            <pnp:Folder Name="06 CAD">
+                <pnp:Folder Name="01 T1 - PATTERN"/>
+                <pnp:Folder Name="02 Pattern Requirements"/>
+                <pnp:Folder Name="03 Config Creation Guidelines"/>
+                <pnp:Folder Name="04 FW23 Config Input"/>
+                <pnp:Folder Name="05 FW24 Config Input"/>
+            </pnp:Folder>
+            <pnp:Folder Name="99_Templates"/>
+          </pnp:Folders>
         </pnp:ListInstance>
         <pnp:ListInstance Title="Open Point List" Description="Track priorities and progress as you work towards delivering products and services." DocumentTemplate="" TemplateType="100" Url="Lists/OpenPointList" EnableVersioning="true" MinorVersionLimit="0" MaxVersionLimit="50" DraftVersionVisibility="0" TemplateFeatureID="00bfea71-de22-43b2-a848-c05709900100" EnableFolderCreation="false" DefaultDisplayFormUrl="{site}/Lists/OpenPointList/DispForm.aspx" DefaultEditFormUrl="{site}/Lists/OpenPointList/EditForm.aspx" DefaultNewFormUrl="{site}/Lists/OpenPointList/NewForm.aspx" ImageUrl="/_layouts/15/images/itgen.png?rev=47" IrmExpire="false" IrmReject="false" IsApplicationList="false" ValidationFormula="" ValidationMessage="">
           <pnp:ContentTypeBindings>
@@ -84,7 +114,7 @@
                 <FieldRef Name="DueDate" />
                 <FieldRef Name="AssignedTo" />
                 <FieldRef Name="Notes" />
-                <FieldRef Name="Report_x0020_Link" />
+                <FieldRef Name="ReportLink" />
               </ViewFields>
               <RowLimit Paged="TRUE">30</RowLimit>
               <JSLink>clienttemplates.js</JSLink>
@@ -153,7 +183,7 @@
                 <FieldRef Name="DueDate" />
                 <FieldRef Name="AssignedTo" />
                 <FieldRef Name="Notes" />
-                <FieldRef Name="Report_x0020_Link" />
+                <FieldRef Name="ReportLink" />
               </ViewFields>
               <RowLimit Paged="TRUE">30</RowLimit>
               <Aggregations Value="Off" />
@@ -194,60 +224,96 @@
             <Field ID="{047b8c34-6c0f-4694-a563-3e54397f0302}" DisplayName="Due date" Description="Due date by when work should be completed" Name="DueDate" ClientSideComponentId="00000000-0000-0000-0000-000000000000" FriendlyDisplayFormat="Relative" Format="DateOnly" Title="Due date" Type="DateTime" StaticName="DueDate" ColName="datetime2" RowOrdinal="0" SourceID="{{listid:OpenPointList}}" />
             <Field ID="{5db4f599-66b9-4fcd-92c6-06fb25f5da2f}" DisplayName="Assigned to" Description="Person or group the work is assigned to" Name="AssignedTo" ClientSideComponentId="00000000-0000-0000-0000-000000000000" Format="Dropdown" List="UserInfo" Title="Assigned to" Type="User" UserSelectionMode="0" UserSelectionScope="0" StaticName="AssignedTo" UserDisplayOptions="NamePhoto" ColName="int1" RowOrdinal="0" SourceID="{{listid:OpenPointList}}" />
             <Field ID="{d2d52938-9473-444d-bd7e-724200f5af79}" DisplayName="Notes" Description="Additional notes" Name="Notes" AppendOnly="FALSE" Format="Dropdown" IsolateStyles="FALSE" RichText="FALSE" RichTextMode="Compatible" Title="Notes" Type="Note" StaticName="Notes" ColName="ntext4" RowOrdinal="0" SourceID="{{listid:OpenPointList}}" />
-            <Field Type="Text" DisplayName="Report Link" Required="FALSE" EnforceUniqueValues="FALSE" Indexed="FALSE" MaxLength="255" ID="{e50e317f-7cf2-46c4-a396-bbb588d4b6d4}" SourceID="{{listid:OpenPointList}}" StaticName="Report_x0020_Link" Name="Report_x0020_Link" ColName="nvarchar6" RowOrdinal="0" />
+            <Field ID="{e50e317f-7cf2-46c4-a396-bbb588d4b6d4}" DisplayName="Report Link" Required="FALSE" Type="Text" EnforceUniqueValues="FALSE" Indexed="FALSE" MaxLength="255"  SourceID="{{listid:OpenPointList}}" StaticName="ReportLink" Name="ReportLink" ColName="nvarchar6" RowOrdinal="0" />
           </pnp:Fields>
-          <pnp:Security>
-            <pnp:BreakRoleInheritance CopyRoleAssignments="false" ClearSubscopes="false">
-              <pnp:RoleAssignment Principal="{associatedownergroupid}" RoleDefinition="Full Control" />
-              <pnp:RoleAssignment Principal="{associatedvisitorgroupid}" RoleDefinition="Read" />
-              <pnp:RoleAssignment Principal="{associatedmembergroupid}" RoleDefinition="Contribute" />
-            </pnp:BreakRoleInheritance>
-          </pnp:Security>
-          <pnp:Webhooks>
-            <pnp:Webhook ServerNotificationUrl="https://westeurope1-0.pushnp.svc.ms/notifications?token=0c32c83f-42aa-47e6-b692-4ce1f2defda6" ExpiresInDays="1" />
-          </pnp:Webhooks>
-        </pnp:ListInstance>
-        <pnp:ListInstance Title="Site Assets" Description="Use this library to store files which are included on pages within this site, such as images on Wiki pages." DocumentTemplate="{site}/SiteAssets/Forms/template.doc" TemplateType="101" Url="SiteAssets" EnableVersioning="true" MinorVersionLimit="0" MaxVersionLimit="500" DraftVersionVisibility="0" TemplateFeatureID="00bfea71-e717-4e80-aa17-d0c71b360101" EnableAttachments="false" DefaultDisplayFormUrl="{site}/SiteAssets/Forms/DispForm.aspx" DefaultEditFormUrl="{site}/SiteAssets/Forms/EditForm.aspx" DefaultNewFormUrl="{site}/SiteAssets/Forms/Upload.aspx" ImageUrl="/_layouts/15/images/itdl.png?rev=47" IrmExpire="false" IrmReject="false" IsApplicationList="true" ValidationFormula="" ValidationMessage="">
-          <pnp:PropertyBagEntries>
-            <pnp:PropertyBagEntry Key="IsAttachmentLibrary" Value="1" Overwrite="false" />
-          </pnp:PropertyBagEntries>
-          <pnp:ContentTypeBindings>
-            <pnp:ContentTypeBinding ContentTypeID="0x0101" Default="true" />
-            <pnp:ContentTypeBinding ContentTypeID="0x0120" />
-          </pnp:ContentTypeBindings>
-          <pnp:Views>
-            <View Name="{76D17772-CAC9-4875-B0E9-9176C2494A7D}" DefaultView="TRUE" MobileView="TRUE" MobileDefaultView="TRUE" Type="HTML" DisplayName="All Documents" Url="{site}/SiteAssets/Forms/AllItems.aspx" Level="1" BaseViewID="1" ContentTypeID="0x" ImageUrl="/_layouts/15/images/dlicon.png?rev=47">
-              <Query>
-                <OrderBy>
-                  <FieldRef Name="FileLeafRef" />
-                </OrderBy>
-              </Query>
-              <ViewFields>
-                <FieldRef Name="DocIcon" />
-                <FieldRef Name="LinkFilename" />
-                <FieldRef Name="Modified" />
-                <FieldRef Name="Editor" />
-              </ViewFields>
-              <RowLimit Paged="TRUE">30</RowLimit>
-              <JSLink>clienttemplates.js</JSLink>
-            </View>
-          </pnp:Views>
-          <pnp:Fields>
-            <Field ID="{d1cff744-ba61-4189-94d6-97d0a9eb4f6a}" Type="Text" DisplayName="Tags" Name="MediaServiceAutoTags" Group="_Hidden" Hidden="FALSE" Sealed="TRUE" ReadOnly="TRUE" ShowInNewForm="FALSE" ShowInDisplayForm="FALSE" ShowInEditForm="FALSE" ShowInListSettings="FALSE" Viewable="FALSE" Json="FALSE" SourceID="{{listid:Site Assets}}" StaticName="MediaServiceAutoTags" ColName="nvarchar14" RowOrdinal="0" />
-            <Field ID="{67aff0cf-8e19-43f2-9987-be89075e1467}" Type="Note" DisplayName="Extracted Text" Name="MediaServiceOCR" Group="_Hidden" Hidden="FALSE" Sealed="TRUE" ReadOnly="TRUE" ShowInNewForm="FALSE" ShowInDisplayForm="FALSE" ShowInEditForm="FALSE" ShowInListSettings="FALSE" Viewable="FALSE" Json="FALSE" SourceID="{{listid:Site Assets}}" StaticName="MediaServiceOCR" ColName="ntext5" RowOrdinal="0" />
-          </pnp:Fields>
-          <pnp:FieldRefs>
-            <pnp:FieldRef ID="cb19284a-cde7-4570-a980-1dab8bd74470" Name="_ExtendedDescription" DisplayName="Description" />
-            <pnp:FieldRef ID="d307dff3-340f-44a2-9f4b-fbfe1ba07459" Name="_CommentCount" DisplayName="Comment count" />
-            <pnp:FieldRef ID="db8d9d6d-dc9a-4fbd-85f3-4a753bfdc58c" Name="_LikeCount" DisplayName="Like count" />
-          </pnp:FieldRefs>
         </pnp:ListInstance>
       </pnp:Lists>
-      <pnp:Features>
-        <pnp:WebFeatures>
-          <pnp:Feature ID="780ac353-eaf8-4ac2-8c47-536d93c03fd6" />
-        </pnp:WebFeatures>
-      </pnp:Features>
+      <pnp:ClientSidePages>
+        <pnp:ClientSidePage PromoteAsNewsArticle="false" PromoteAsTemplate="false" Overwrite="true" EnableComments="false" Title="Team" ThumbnailUrl="" PageName="Team.aspx">
+          <pnp:Header Type="Default" LayoutType="NoImage" TextAlignment="Center" ShowTopicHeader="false" ShowPublishDate="false" TopicHeader="" AlternativeText="" Authors="[]" AuthorByLine="[]" AuthorByLineId="-1" />
+          <pnp:Sections>
+            <pnp:Section Order="1" Type="OneColumn">
+              <pnp:Controls>
+                <pnp:CanvasControl WebPartType="Text" ControlId="ab216852-9c6e-43fe-826c-1705c74481fd" Order="1" Column="1">
+                  <pnp:CanvasControlProperties>
+                    <pnp:CanvasControlProperty Key="Text" Value="&lt;p&gt;The Strung Tech group&amp;nbsp;is represented on 3 continents and works cross-functional beyond departments.&lt;/p&gt;&lt;p&gt;We consist of individuals from Sourcing in China, Strung Center HZO and Adidas Innovation.&amp;nbsp;&lt;/p&gt;" />
+                  </pnp:CanvasControlProperties>
+                </pnp:CanvasControl>
+                <pnp:CanvasControl WebPartType="Divider" JsonControlData="{&quot;id&quot;: &quot;2161a1c6-db61-4731-b97c-3cdb303f7cbb&quot;, &quot;instanceId&quot;: &quot;6b27c0ce-6502-45e3-9994-49469e75ca13&quot;, &quot;title&quot;: &quot;Divider&quot;, &quot;description&quot;: &quot;Divider&quot;, &quot;dataVersion&quot;: &quot;1.1&quot;, &quot;properties&quot;: {&quot;length&quot;:100,&quot;weight&quot;:1}, &quot;serverProcessedContent&quot;: {&quot;htmlStrings&quot;:{},&quot;searchablePlainTexts&quot;:{},&quot;imageSources&quot;:{},&quot;links&quot;:{}}, &quot;dynamicDataPaths&quot;: {}, &quot;dynamicDataValues&quot;: {}}" ControlId="2161a1c6-db61-4731-b97c-3cdb303f7cbb" Order="2" Column="1" />
+                <pnp:CanvasControl WebPartType="People" JsonControlData="{&quot;id&quot;: &quot;7f718435-ee4d-431c-bdbf-9c4ff326f46e&quot;, &quot;instanceId&quot;: &quot;c223d46a-6932-4280-a7ac-3610e554446a&quot;, &quot;title&quot;: &quot;People&quot;, &quot;description&quot;: &quot;People&quot;, &quot;dataVersion&quot;: &quot;1.3&quot;, &quot;properties&quot;: {&quot;layout&quot;:1,&quot;persons&quot;:[{&quot;id&quot;:&quot;clemens.dyckmans@adidas.com&quot;,&quot;role&quot;:&quot;Sr Manager Technology Creation&quot;,&quot;department&quot;:&quot;Global Brands - Future&quot;},{&quot;id&quot;:&quot;Nicholas.Groeneweg@adidas.com&quot;,&quot;role&quot;:&quot;Senior Manager Technology Creation&quot;,&quot;department&quot;:&quot;Global Brands - Future&quot;},{&quot;id&quot;:&quot;Katrin.Dietrich@adidas.com&quot;,&quot;role&quot;:&quot;Assistant Manager Technology Creation&quot;,&quot;department&quot;:&quot;Global Brands&quot;},{&quot;id&quot;:&quot;gillian.pinder@adidas.com&quot;,&quot;role&quot;:&quot;Manager Mechanical Engineering&quot;,&quot;department&quot;:&quot;Global Brands - Future&quot;},{&quot;id&quot;:&quot;Ian.Hennebery@adidas.com&quot;,&quot;role&quot;:&quot;Manager Credibility Concepts FTW&quot;,&quot;department&quot;:&quot;Global Brands - Future&quot;},{&quot;id&quot;:&quot;Henry.Hanson@adidas.com&quot;,&quot;role&quot;:&quot;Senior Manager Mechanical Engineering&quot;,&quot;department&quot;:&quot;Global Brands - Future&quot;},{&quot;id&quot;:&quot;Mario.Poerner@adidas-group.com&quot;,&quot;role&quot;:&quot;Senior Solution Architect&quot;,&quot;department&quot;:&quot;TECH - BCT&quot;},{&quot;id&quot;:&quot;Elise.Hall@adidas.com&quot;,&quot;role&quot;:&quot;Manager Interactive Engineering&quot;,&quot;department&quot;:&quot;Global Brands - Future&quot;},{&quot;id&quot;:&quot;Christopher.Polster@adidas.com&quot;,&quot;role&quot;:&quot;Sr. Manager Mechanical Engineering&quot;,&quot;department&quot;:&quot;Global Brands - Innovation Engineering&quot;},{&quot;id&quot;:&quot;John.Rutledge@adidas.com&quot;,&quot;role&quot;:&quot;Manager Future Textile Engineering&quot;,&quot;department&quot;:&quot;Global Brands - Future&quot;}]}, &quot;serverProcessedContent&quot;: {&quot;htmlStrings&quot;:{},&quot;searchablePlainTexts&quot;:{&quot;title&quot;:&quot;Innovation&quot;,&quot;persons[0].name&quot;:&quot;Dyckmans, Clemens&quot;,&quot;persons[1].name&quot;:&quot;Groeneweg, Nicholas&quot;,&quot;persons[2].name&quot;:&quot;Dietrich, Katrin&quot;,&quot;persons[3].name&quot;:&quot;Pinder, Gillian&quot;,&quot;persons[4].name&quot;:&quot;Hennebery, Ian&quot;,&quot;persons[5].name&quot;:&quot;Hanson, Henry&quot;,&quot;persons[6].name&quot;:&quot;Poerner, Mario&quot;,&quot;persons[7].name&quot;:&quot;Hall, Elise&quot;,&quot;persons[8].name&quot;:&quot;Polster, Christopher&quot;,&quot;persons[9].name&quot;:&quot;Rutledge, John&quot;,&quot;persons[0].email&quot;:&quot;Clemens.Dyckmans@adidas.com&quot;,&quot;persons[1].email&quot;:&quot;Nicholas.Groeneweg@adidas.com&quot;,&quot;persons[2].email&quot;:&quot;Katrin.Dietrich@adidas.com&quot;,&quot;persons[3].email&quot;:&quot;gillian.pinder@adidas.com&quot;,&quot;persons[4].email&quot;:&quot;Ian.Hennebery@adidas.com&quot;,&quot;persons[5].email&quot;:&quot;Henry.Hanson@adidas.com&quot;,&quot;persons[6].email&quot;:&quot;Mario.Poerner@adidas-group.com&quot;,&quot;persons[7].email&quot;:&quot;Elise.Hall@adidas.com&quot;,&quot;persons[8].email&quot;:&quot;Christopher.Polster@adidas.com&quot;,&quot;persons[9].email&quot;:&quot;John.Rutledge@adidas.com&quot;},&quot;imageSources&quot;:{},&quot;links&quot;:{}}, &quot;dynamicDataPaths&quot;: {}, &quot;dynamicDataValues&quot;: {}}" ControlId="7f718435-ee4d-431c-bdbf-9c4ff326f46e" Order="3" Column="1" />
+                <pnp:CanvasControl WebPartType="People" JsonControlData="{&quot;id&quot;: &quot;7f718435-ee4d-431c-bdbf-9c4ff326f46e&quot;, &quot;instanceId&quot;: &quot;976aaa3a-f057-4fe4-b081-0d87e97596d4&quot;, &quot;title&quot;: &quot;People&quot;, &quot;description&quot;: &quot;People&quot;, &quot;dataVersion&quot;: &quot;1.3&quot;, &quot;properties&quot;: {&quot;layout&quot;:1,&quot;persons&quot;:[{&quot;id&quot;:&quot;Andreas.AlonsoEgerer@adidas.com&quot;,&quot;role&quot;:&quot;Director Engineering FW&quot;,&quot;department&quot;:&quot;Global Operations - Advanced Creation&quot;},{&quot;id&quot;:&quot;Florin.Filipescu@adidas.com&quot;,&quot;role&quot;:&quot;Senior Manager Knit Technologies&quot;,&quot;department&quot;:&quot;Global Operations - Advanced Creation FTW&quot;},{&quot;id&quot;:&quot;Sandra.Wirtanen@adidas.com&quot;,&quot;role&quot;:&quot;Technical Manager  Textile Technologies&quot;,&quot;department&quot;:&quot;Global Operations - Team Sports&quot;},{&quot;id&quot;:&quot;Ramona.Nolden@adidas.com&quot;,&quot;role&quot;:&quot;Technical Manager  Textile Technologies&quot;,&quot;department&quot;:&quot;Global Operations&quot;},{&quot;id&quot;:&quot;Simon.Stegmueller@adidas.com&quot;,&quot;role&quot;:&quot;Technical Manager Textile Technologies&quot;,&quot;department&quot;:&quot;Global Operations - ACT-Product Engineering&quot;}]}, &quot;serverProcessedContent&quot;: {&quot;htmlStrings&quot;:{},&quot;searchablePlainTexts&quot;:{&quot;title&quot;:&quot;Strung Center HZO&quot;,&quot;persons[0].name&quot;:&quot;Alonso Egerer, Andreas&quot;,&quot;persons[1].name&quot;:&quot;Filipescu, Florin&quot;,&quot;persons[2].name&quot;:&quot;Wirtanen, Sandra&quot;,&quot;persons[3].name&quot;:&quot;Nolden, Ramona&quot;,&quot;persons[4].name&quot;:&quot;Stegmueller, Simon&quot;,&quot;persons[0].email&quot;:&quot;Andreas.AlonsoEgerer@adidas.com&quot;,&quot;persons[1].email&quot;:&quot;Florin.Filipescu@adidas.com&quot;,&quot;persons[2].email&quot;:&quot;Sandra.Wirtanen@adidas.com&quot;,&quot;persons[3].email&quot;:&quot;Ramona.Nolden@adidas.com&quot;,&quot;persons[4].email&quot;:&quot;Simon.Stegmueller@adidas.com&quot;},&quot;imageSources&quot;:{},&quot;links&quot;:{}}, &quot;dynamicDataPaths&quot;: {}, &quot;dynamicDataValues&quot;: {}}" ControlId="7f718435-ee4d-431c-bdbf-9c4ff326f46e" Order="4" Column="1" />
+                <pnp:CanvasControl WebPartType="People" JsonControlData="{&quot;id&quot;: &quot;7f718435-ee4d-431c-bdbf-9c4ff326f46e&quot;, &quot;instanceId&quot;: &quot;47679352-5832-4408-a7f4-ac5a3b41e634&quot;, &quot;title&quot;: &quot;People&quot;, &quot;description&quot;: &quot;People&quot;, &quot;dataVersion&quot;: &quot;1.3&quot;, &quot;properties&quot;: {&quot;layout&quot;:1,&quot;persons&quot;:[{&quot;id&quot;:&quot;Korbinian.Berner@adidas-group.com&quot;,&quot;role&quot;:&quot;Sr Mgr Concepts Sourcing Product Inn FW&quot;,&quot;department&quot;:&quot;Global Operations - Product Operation Sourcing&quot;},{&quot;id&quot;:&quot;Pierre.Luo@adidas.com&quot;,&quot;role&quot;:&quot;Sr Mgr Projects Sourcing Prdt Innovation&quot;,&quot;department&quot;:&quot;Global Operations&quot;},{&quot;id&quot;:&quot;Xiaoshen.Wang@adidas.com&quot;,&quot;role&quot;:&quot;Asst Mgr Tech Engin Sour Prdt Inno FW&quot;,&quot;department&quot;:&quot;Global Operations&quot;},{&quot;id&quot;:&quot;Jason.Xu@adidas-group.com&quot;,&quot;role&quot;:&quot;Sr Mgr Concepts Sourcing Prodt Inno FW&quot;,&quot;department&quot;:&quot;Global Operations - Future Team GZ Adidas&quot;},{&quot;id&quot;:&quot;mark.lin@adidas.com&quot;,&quot;role&quot;:&quot;Sr Mgr Manufacturing Excellence FW&quot;,&quot;department&quot;:&quot;Global Operations - Future&quot;}]}, &quot;serverProcessedContent&quot;: {&quot;htmlStrings&quot;:{},&quot;searchablePlainTexts&quot;:{&quot;title&quot;:&quot;Sourcing Product Innovation - YY&quot;,&quot;persons[0].name&quot;:&quot;Berner, Korbinian&quot;,&quot;persons[1].name&quot;:&quot;Luo, Pierre&quot;,&quot;persons[2].name&quot;:&quot;Wang, Xiaoshen&quot;,&quot;persons[3].name&quot;:&quot;Xu, Jason&quot;,&quot;persons[4].name&quot;:&quot;Lin, Mark&quot;,&quot;persons[0].email&quot;:&quot;Korbinian.Berner@adidas-group.com&quot;,&quot;persons[1].email&quot;:&quot;Pierre.Luo@adidas.com&quot;,&quot;persons[2].email&quot;:&quot;Xiaoshen.Wang@adidas.com&quot;,&quot;persons[3].email&quot;:&quot;Jason.Xu@adidas-group.com&quot;,&quot;persons[4].email&quot;:&quot;mark.lin@adidas.com&quot;},&quot;imageSources&quot;:{},&quot;links&quot;:{}}, &quot;dynamicDataPaths&quot;: {}, &quot;dynamicDataValues&quot;: {}}" ControlId="7f718435-ee4d-431c-bdbf-9c4ff326f46e" Order="5" Column="1" />
+                <pnp:CanvasControl WebPartType="People" JsonControlData="{&quot;id&quot;: &quot;7f718435-ee4d-431c-bdbf-9c4ff326f46e&quot;, &quot;instanceId&quot;: &quot;ae8288ae-713e-428f-8549-ef7834703459&quot;, &quot;title&quot;: &quot;People&quot;, &quot;description&quot;: &quot;People&quot;, &quot;dataVersion&quot;: &quot;1.3&quot;, &quot;properties&quot;: {&quot;layout&quot;:1,&quot;persons&quot;:[{&quot;id&quot;:&quot;wonder.liu@adidas.com&quot;,&quot;role&quot;:&quot;Sr Mgr Mtl Technology Incubation FW&quot;,&quot;department&quot;:&quot;Global Operations&quot;},{&quot;id&quot;:&quot;danny.wu1@adidas.com&quot;,&quot;upn&quot;:&quot;&quot;,&quot;role&quot;:&quot;Sr Mgr Mtl Technology Incubation FW&quot;,&quot;department&quot;:&quot;Global Operations - Strategic Technoloty Ops&quot;,&quot;phone&quot;:&quot;&quot;,&quot;sip&quot;:&quot;&quot;}]}, &quot;serverProcessedContent&quot;: {&quot;htmlStrings&quot;:{},&quot;searchablePlainTexts&quot;:{&quot;title&quot;:&quot;GOPS Sourcing - China&quot;,&quot;persons[0].name&quot;:&quot;Liu, Wonder&quot;,&quot;persons[1].name&quot;:&quot;Wu, Danny&quot;,&quot;persons[0].email&quot;:&quot;wonder.liu@adidas.com&quot;,&quot;persons[1].email&quot;:&quot;danny.wu1@adidas.com&quot;},&quot;imageSources&quot;:{},&quot;links&quot;:{}}, &quot;dynamicDataPaths&quot;: {}, &quot;dynamicDataValues&quot;: {}}" ControlId="7f718435-ee4d-431c-bdbf-9c4ff326f46e" Order="6" Column="1" />
+              </pnp:Controls>
+            </pnp:Section>
+          </pnp:Sections>
+        </pnp:ClientSidePage>
+        <pnp:ClientSidePage PromoteAsNewsArticle="false" PromoteAsTemplate="false" Overwrite="true" EnableComments="false" Title="Smartsheet" ThumbnailUrl="" PageName="Smartsheet.aspx">
+          <pnp:Header Type="Default" LayoutType="NoImage" TextAlignment="Center" ShowTopicHeader="false" ShowPublishDate="false" TopicHeader="" AlternativeText="" Authors="[]" AuthorByLine="[]" AuthorByLineId="-1" />
+          <pnp:Sections>
+            <pnp:Section Order="1" Type="OneColumn">
+              <pnp:Controls>
+                <pnp:CanvasControl WebPartType="Text" ControlId="f38b4ff0-9cef-4726-919b-74fe5fef8c01" Order="1" Column="1">
+                  <pnp:CanvasControlProperties>
+                    <pnp:CanvasControlProperty Key="Text" Value="&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;h3 style=&quot;text-align:center;&quot;&gt;Integrate your smartsheet with SharePoint Online using the&amp;nbsp;&lt;strong&gt;Embed&lt;/strong&gt;&amp;nbsp;webpart.&lt;/h3&gt;&lt;p style=&quot;text-align:center;&quot;&gt;Click &lt;a data-interception=&quot;off&quot; data-cke-saved-href=&quot;/sites/SharePointOnline/SitePages/Embed-Smartsheet.aspx&quot; href=&quot;/sites/SharePointOnline/SitePages/Embed-Smartsheet.aspx&quot; target=&quot;_blank&quot;&gt;here&lt;/a&gt; to learn how to embed smartsheet on your SharePoint page.&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;&lt;p&gt;&lt;br&gt;&lt;/p&gt;" />
+                  </pnp:CanvasControlProperties>
+                </pnp:CanvasControl>
+                <pnp:CanvasControl WebPartType="ContentEmbed" JsonControlData="{&quot;id&quot;: &quot;490d7c76-1824-45b2-9de3-676421c997fa&quot;, &quot;instanceId&quot;: &quot;c922dfa8-ab13-4dfd-bf4c-88c5afbfc88f&quot;, &quot;title&quot;: &quot;Embed&quot;, &quot;description&quot;: &quot;Embed&quot;, &quot;dataVersion&quot;: &quot;1.2&quot;, &quot;properties&quot;: {&quot;embedCode&quot;:&quot;&lt;iframe width=\&quot;1000\&quot; height=\&quot;700\&quot; frameborder=\&quot;0\&quot; src=\&quot;https://app.smartsheet.com/b/publish?EQBCT=34c9d33b75c245bc9fcb9da7e2d785ab\&quot;&gt;&lt;/iframe&gt;&quot;,&quot;cachedEmbedCode&quot;:&quot;&lt;iframe width=\&quot;1000\&quot; height=\&quot;700\&quot; frameborder=\&quot;0\&quot; src=\&quot;https://app.smartsheet.com/b/publish?EQBCT=34c9d33b75c245bc9fcb9da7e2d785ab\&quot;&gt;&lt;/iframe&gt;&quot;,&quot;shouldScaleWidth&quot;:true,&quot;tempState&quot;:{},&quot;cachedEmbedCodeThumbnail&quot;:&quot;&quot;,&quot;captionText&quot;:&quot;&quot;,&quot;thumbnailUrl&quot;:&quot;&quot;,&quot;webPartContentUrl&quot;:&quot;&lt;iframe width=\&quot;1000\&quot; height=\&quot;700\&quot; frameborder=\&quot;0\&quot; src=\&quot;https://app.smartsheet.com/b/publish?EQBCT=34c9d33b75c245bc9fcb9da7e2d785ab\&quot;&gt;&lt;/iframe&gt;&quot;}, &quot;serverProcessedContent&quot;: {&quot;htmlStrings&quot;:{},&quot;searchablePlainTexts&quot;:{},&quot;imageSources&quot;:{},&quot;links&quot;:{}}, &quot;dynamicDataPaths&quot;: {}, &quot;dynamicDataValues&quot;: {}}" ControlId="490d7c76-1824-45b2-9de3-676421c997fa" Order="2" Column="1" />
+              </pnp:Controls>
+            </pnp:Section>
+          </pnp:Sections>
+        </pnp:ClientSidePage>
+        <pnp:ClientSidePage PromoteAsNewsArticle="false" PromoteAsTemplate="false" Overwrite="true" EnableComments="false" Title="Sample Management" ThumbnailUrl="" PageName="Sample Management.aspx">
+          <pnp:Header Type="Default" LayoutType="NoImage" TextAlignment="Center" ShowTopicHeader="false" ShowPublishDate="false" TopicHeader="" AlternativeText="" Authors="[]" AuthorByLine="[]" AuthorByLineId="-1" />
+          <pnp:Sections>
+            <pnp:Section Order="1" Type="OneColumn">
+              <pnp:Controls>
+                <pnp:CanvasControl WebPartType="Text" ControlId="45c6e7df-2d05-4cbb-ab00-e8a2f40d0f68" Order="1" Column="1">
+                  <pnp:CanvasControlProperties>
+                    <pnp:CanvasControlProperty Key="Text" Value="&lt;p&gt;Please ensure to approach the request management team before filling a component ask.&lt;/p&gt;&lt;p&gt;They will align every Monday on the request allocation&lt;/p&gt;" />
+                  </pnp:CanvasControlProperties>
+                </pnp:CanvasControl>
+              </pnp:Controls>
+            </pnp:Section>
+            <pnp:Section Order="2" Type="ThreeColumn" BackgroundEmphasis="Strong">
+              <pnp:Controls>
+                <pnp:CanvasControl WebPartType="Text" ControlId="c509286e-7bf5-4bae-b324-e86f2b30126c" Order="1" Column="1">
+                  <pnp:CanvasControlProperties>
+                    <pnp:CanvasControlProperty Key="Text" Value="&lt;h2&gt;Ask for Samples&lt;/h2&gt;" />
+                  </pnp:CanvasControlProperties>
+                </pnp:CanvasControl>
+                <pnp:CanvasControl WebPartType="Button" JsonControlData="{&quot;id&quot;: &quot;0f087d7f-520e-42b7-89c0-496aaf979d58&quot;, &quot;instanceId&quot;: &quot;a481a850-193d-45f8-86c9-2232702b3bde&quot;, &quot;title&quot;: &quot;Button&quot;, &quot;description&quot;: &quot;Button&quot;, &quot;dataVersion&quot;: &quot;1.0&quot;, &quot;properties&quot;: {&quot;alignment&quot;:&quot;Left&quot;}, &quot;serverProcessedContent&quot;: {&quot;htmlStrings&quot;:{},&quot;searchablePlainTexts&quot;:{&quot;label&quot;:&quot;SAMPLE REQUEST FORM&quot;},&quot;imageSources&quot;:{},&quot;links&quot;:{&quot;linkUrl&quot;:&quot;https://app.smartsheet.com/b/form/ef02a79f6d754ad18e5390a9a95b021b&quot;}}, &quot;dynamicDataPaths&quot;: {}, &quot;dynamicDataValues&quot;: {}}" ControlId="0f087d7f-520e-42b7-89c0-496aaf979d58" Order="1" Column="2" />
+              </pnp:Controls>
+            </pnp:Section>
+            <pnp:Section Order="3" Type="ThreeColumn" BackgroundEmphasis="Strong">
+              <pnp:Controls>
+                <pnp:CanvasControl WebPartType="Text" ControlId="c1881a25-b0b3-4512-bb1e-1a39b4e0d22a" Order="1" Column="1">
+                  <pnp:CanvasControlProperties>
+                    <pnp:CanvasControlProperty Key="Text" Value="&lt;h2&gt;&lt;span class=&quot;fontSizeXxLarge&quot;&gt;Check Request Status&lt;/span&gt;&lt;/h2&gt;" />
+                  </pnp:CanvasControlProperties>
+                </pnp:CanvasControl>
+                <pnp:CanvasControl WebPartType="Button" JsonControlData="{&quot;id&quot;: &quot;0f087d7f-520e-42b7-89c0-496aaf979d58&quot;, &quot;instanceId&quot;: &quot;4cde5e56-55c2-435a-82f8-87c7b6be0173&quot;, &quot;title&quot;: &quot;Button&quot;, &quot;description&quot;: &quot;Button&quot;, &quot;dataVersion&quot;: &quot;1.0&quot;, &quot;properties&quot;: {&quot;alignment&quot;:&quot;Left&quot;}, &quot;serverProcessedContent&quot;: {&quot;htmlStrings&quot;:{},&quot;searchablePlainTexts&quot;:{&quot;label&quot;:&quot;SAMPLE MATRIX&quot;},&quot;imageSources&quot;:{},&quot;links&quot;:{&quot;linkUrl&quot;:&quot;https://app.smartsheet.com/sheets/9c6FHPgF8mv987gRwq8q5G6CFHMJ5gcG9JPfQWr1?view=grid&quot;}}, &quot;dynamicDataPaths&quot;: {}, &quot;dynamicDataValues&quot;: {}}" ControlId="0f087d7f-520e-42b7-89c0-496aaf979d58" Order="1" Column="2" />
+                <pnp:CanvasControl WebPartType="Text" ControlId="47e9801b-eb30-4bb1-99fe-78c5a545c42f" Order="1" Column="3">
+                  <pnp:CanvasControlProperties>
+                    <pnp:CanvasControlProperty Key="Text" Value="&lt;br&gt;" />
+                  </pnp:CanvasControlProperties>
+                </pnp:CanvasControl>
+              </pnp:Controls>
+            </pnp:Section>
+          </pnp:Sections>
+        </pnp:ClientSidePage>
+        <pnp:ClientSidePage PromoteAsNewsArticle="false" PromoteAsTemplate="false" Overwrite="true" Layout="Home" EnableComments="false" Title="Home" ThumbnailUrl="" PageName="Home.aspx">
+          <pnp:Header Type="Default" LayoutType="FullWidthImage" ShowTopicHeader="false" ShowPublishDate="false" TopicHeader="" AlternativeText="" Authors="[]" AuthorByLine="[]" AuthorByLineId="-1" />
+          <pnp:Sections>
+            <pnp:Section Order="1" Type="TwoColumnLeft">
+              <pnp:Controls>
+                <pnp:CanvasControl WebPartType="List" JsonControlData="{&quot;id&quot;: &quot;f92bf067-bc19-489e-a556-7fe95f508720&quot;, &quot;instanceId&quot;: &quot;b9834f26-4ffd-4c3a-bbc6-61b212883f8f&quot;, &quot;title&quot;: &quot;Document library&quot;, &quot;description&quot;: &quot;&quot;, &quot;dataVersion&quot;: &quot;1.0&quot;, &quot;properties&quot;: {&quot;isDocumentLibrary&quot;:true,&quot;showDefaultDocumentLibrary&quot;:true,&quot;webpartHeightKey&quot;:4,&quot;selectedListUrl&quot;:&quot;&quot;}, &quot;serverProcessedContent&quot;: {&quot;htmlStrings&quot;:{},&quot;searchablePlainTexts&quot;:{&quot;listTitle&quot;:&quot;Documents&quot;},&quot;imageSources&quot;:{},&quot;links&quot;:{}}, &quot;dynamicDataPaths&quot;: {}, &quot;dynamicDataValues&quot;: {&quot;filterBy&quot;:{}}}" ControlId="f92bf067-bc19-489e-a556-7fe95f508720" Order="1" Column="1" />
+                <pnp:CanvasControl WebPartType="QuickLinks" JsonControlData="{&quot;id&quot;: &quot;c70391ea-0b10-4ee9-b2b4-006d3fcad0cd&quot;, &quot;instanceId&quot;: &quot;8e8aa79b-7c5c-4163-842b-d308aa8401ae&quot;, &quot;title&quot;: &quot;Quick links&quot;, &quot;description&quot;: &quot;&quot;, &quot;dataVersion&quot;: &quot;2.2&quot;, &quot;properties&quot;: {&quot;items&quot;:[{&quot;sourceItem&quot;:{&quot;guids&quot;:{&quot;siteId&quot;:&quot;{sitecollectionid}&quot;,&quot;webId&quot;:&quot;{siteid}&quot;,&quot;listId&quot;:&quot;{{listid:Site Pages}}&quot;,&quot;uniqueId&quot;:&quot;63c607e8-3345-4fef-bdd7-8fbb3923c355&quot;},&quot;itemType&quot;:0,&quot;fileExtension&quot;:&quot;.ASPX&quot;,&quot;progId&quot;:null},&quot;thumbnailType&quot;:3,&quot;id&quot;:5,&quot;description&quot;:&quot;&quot;,&quot;altText&quot;:&quot;&quot;,&quot;rawPreviewImageMinCanvasWidth&quot;:32767},{&quot;sourceItem&quot;:{&quot;guids&quot;:{&quot;siteId&quot;:&quot;{sitecollectionid}&quot;,&quot;webId&quot;:&quot;{siteid}&quot;,&quot;listId&quot;:&quot;{{listid:Site Pages}}&quot;,&quot;uniqueId&quot;:&quot;6e9ff4af-20ff-4975-9dd5-9d1776605dab&quot;},&quot;itemType&quot;:0,&quot;fileExtension&quot;:&quot;.ASPX&quot;,&quot;progId&quot;:null},&quot;thumbnailType&quot;:3,&quot;id&quot;:4,&quot;description&quot;:&quot;&quot;,&quot;altText&quot;:&quot;&quot;,&quot;rawPreviewImageMinCanvasWidth&quot;:32767},{&quot;sourceItem&quot;:{&quot;guids&quot;:{&quot;siteId&quot;:&quot;{sitecollectionid}&quot;,&quot;webId&quot;:&quot;{siteid}&quot;,&quot;listId&quot;:&quot;{{listid:Site Pages}}&quot;,&quot;uniqueId&quot;:&quot;b53cc3e4-d679-4416-b4ce-f3ba277a460a&quot;},&quot;itemType&quot;:0,&quot;fileExtension&quot;:&quot;.ASPX&quot;,&quot;progId&quot;:null},&quot;thumbnailType&quot;:3,&quot;id&quot;:3,&quot;description&quot;:&quot;&quot;,&quot;altText&quot;:&quot;&quot;,&quot;rawPreviewImageMinCanvasWidth&quot;:32767},{&quot;sourceItem&quot;:{&quot;itemType&quot;:2},&quot;thumbnailType&quot;:3,&quot;id&quot;:1,&quot;description&quot;:&quot;&quot;,&quot;altText&quot;:&quot;&quot;,&quot;rawPreviewImageMinCanvasWidth&quot;:32767},{&quot;sourceItem&quot;:{&quot;itemType&quot;:2},&quot;thumbnailType&quot;:3,&quot;id&quot;:2,&quot;description&quot;:&quot;&quot;,&quot;altText&quot;:&quot;&quot;,&quot;rawPreviewImageMinCanvasWidth&quot;:32767}],&quot;isMigrated&quot;:true,&quot;layoutId&quot;:&quot;Button&quot;,&quot;shouldShowThumbnail&quot;:true,&quot;hideWebPartWhenEmpty&quot;:true,&quot;dataProviderId&quot;:&quot;QuickLinks&quot;,&quot;listLayoutOptions&quot;:{&quot;showDescription&quot;:false,&quot;showIcon&quot;:true},&quot;imageWidth&quot;:100,&quot;buttonLayoutOptions&quot;:{&quot;showDescription&quot;:true,&quot;buttonTreatment&quot;:2,&quot;iconPositionType&quot;:2,&quot;textAlignmentVertical&quot;:2,&quot;textAlignmentHorizontal&quot;:2,&quot;linesOfText&quot;:2},&quot;waffleLayoutOptions&quot;:{&quot;iconSize&quot;:1,&quot;onlyShowThumbnail&quot;:false},&quot;webId&quot;:&quot;{siteid}&quot;,&quot;siteId&quot;:&quot;{sitecollectionid}&quot;}, &quot;serverProcessedContent&quot;: {&quot;htmlStrings&quot;:{},&quot;searchablePlainTexts&quot;:{&quot;title&quot;:&quot;Quick links&quot;,&quot;items[0].title&quot;:&quot;Team&quot;,&quot;items[1].title&quot;:&quot;Sample Management&quot;,&quot;items[2].title&quot;:&quot;Smartsheet&quot;,&quot;items[3].title&quot;:&quot;Learn about a team site&quot;,&quot;items[4].title&quot;:&quot;Learn how to add a page&quot;},&quot;imageSources&quot;:{},&quot;links&quot;:{&quot;baseUrl&quot;:&quot;https://{fqdn}{site}&quot;,&quot;items[0].sourceItem.url&quot;:&quot;{site}/SitePages/Team.aspx&quot;,&quot;items[1].sourceItem.url&quot;:&quot;{site}/SitePages/Sample%20Management.aspx&quot;,&quot;items[2].sourceItem.url&quot;:&quot;{site}/SitePages/Smartsheet.aspx&quot;,&quot;items[3].sourceItem.url&quot;:&quot;https://go.microsoft.com/fwlink/p/?linkid=827918&quot;,&quot;items[4].sourceItem.url&quot;:&quot;https://go.microsoft.com/fwlink/p/?linkid=827919&quot;},&quot;componentDependencies&quot;:{&quot;layoutComponentId&quot;:&quot;706e33c8-af37-4e7b-9d22-6e5694d92a6f&quot;}}, &quot;dynamicDataPaths&quot;: {}, &quot;dynamicDataValues&quot;: {}}" ControlId="c70391ea-0b10-4ee9-b2b4-006d3fcad0cd" Order="1" Column="2" />
+              </pnp:Controls>
+            </pnp:Section>
+          </pnp:Sections>
+        </pnp:ClientSidePage>
+      </pnp:ClientSidePages>
     </pnp:ProvisioningTemplate>
   </pnp:Templates>
 </pnp:Provisioning>
