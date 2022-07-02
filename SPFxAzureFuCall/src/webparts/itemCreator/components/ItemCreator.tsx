@@ -163,7 +163,7 @@ export default class ItemCreator extends React.Component<IItemCreatorProps, IIte
       body: bodyContent,
     };
     // Redirecting after save or cancel
-    const results: any[] = await (await client.post(this.props.apiUrl, AadHttpClient.configurations.v1, httpClientOptions)).json();
+    await (await client.post(this.props.apiUrl, AadHttpClient.configurations.v1, httpClientOptions));
     if (this.props.redirectUrl !== '') {
       window.location.href = this.props.redirectUrl;
     }
