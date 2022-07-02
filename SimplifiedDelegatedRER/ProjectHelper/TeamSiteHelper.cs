@@ -61,15 +61,6 @@ namespace SimplifiedDelegatedRER
             Stream downloadedContentStream = await templateDocument.GetContentAsync();
             var provisioningTemplate = XMLPnPSchemaFormatter.LatestFormatter.ToProvisioningTemplate(downloadedContentStream);
 
-            //Reading Folder information
-            string folderInfoUrl = string.Format("{0}{1}", contextPrimaryHub.Uri.PathAndQuery,_settings.OIPFolderInfojson);
-            IFile folderDocument = await contextPrimaryHub.Web.GetFileByServerRelativeUrlAsync(folderInfoUrl);
-            // Download the template file as stream
-            Stream folderContentStream = await folderDocument.GetContentAsync();
-            StreamReader reader = new StreamReader(folderContentStream);
-            string folderjson = reader.ReadToEnd();
-            FolderCreationInfo folderInfo = JsonSerializer.Deserialize<FolderCreationInfo>(folderjson);
-
             // Working on Teams Site                 // Associating to Hub
             ISite assocSite = await pnpProjectSiteContext.Site.GetAsync(
                 p => p.HubSiteId,
@@ -113,9 +104,6 @@ namespace SimplifiedDelegatedRER
                 };
                 web.ApplyProvisioningTemplate(provisioningTemplate, ptai);
             }
-            // Creating Folders
-            ut.CreateFolders(folderInfo, pnpProjectSiteContext);
-
             //Sending Email to Owner
             ut.UpdateSpList(_settings.OIPMailListId, ProjectTitle, ProjectDescription, ProjectRequestor, TeamSiteUrl, contextPrimaryHub);
         }

@@ -59,15 +59,6 @@ namespace SimplifiedDelegatedRER
                 var provisioningTemplate = XMLPnPSchemaFormatter.LatestFormatter.ToProvisioningTemplate(downloadedContentStream);
                 _log.LogInformation($"Template ID to apply :{provisioningTemplate.Id}");
 
-                //Reading Folder information
-                string folderInfoUrl = string.Format("{0}{1}", contextPrimaryHub.Uri.PathAndQuery, _settings.RelationFolderInfojson);
-                IFile folderDocument = await contextPrimaryHub.Web.GetFileByServerRelativeUrlAsync(folderInfoUrl);
-                // Download the template file as stream
-                Stream folderContentStream = await folderDocument.GetContentAsync();
-                StreamReader reader = new StreamReader(folderContentStream);
-                string folderjson = reader.ReadToEnd();
-                FolderCreationInfo folderInfo = JsonSerializer.Deserialize<FolderCreationInfo>(folderjson);
-
                 //Creating new request for Teams site without Group  
                 var teamsSiteToCreate = new TeamSiteWithoutGroupOptions(new Uri($"https://{contextPrimaryHub.Uri.DnsSafeHost}/sites/{uniqueSiteName}"), ProjectTitle)
                 {
@@ -150,8 +141,6 @@ namespace SimplifiedDelegatedRER
                         };
                         web.ApplyProvisioningTemplate(provisioningTemplate, ptai);
                     }
-                    // Creating Folders
-                    ut.CreateFolders(folderInfo, newSiteContext);
                 }
                 //Sending Email to Owner
                 ut.UpdateSpList(_settings.RelationMailListId, ProjectTitle, ProjectDescription, ProjectRequestor, teamsSiteUrl, contextPrimaryHub);

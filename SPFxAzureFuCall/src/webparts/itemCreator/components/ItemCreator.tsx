@@ -135,12 +135,12 @@ export default class ItemCreator extends React.Component<IItemCreatorProps, IIte
   private saveProjectRequest = async (): Promise<void> => {
     this.setState({ Submitted: true });
     if (this.state.Title == '' || this.state.Description == '' || this.state.Onwers.length === 0 || this.state.Members.length === 0) {
-       return;
+      return;
     }
     //Loading List 
     const requestList = await this.sp.web.lists.getByTitle(this.props.ListTitle);
     const requestListId = await requestList.select("Id")();
-    
+
     // add an item to the list
     // *** WARNING ***Append 'Id' on User Field internal Name otherwise api will not work
     const iar: IItemAddResult = await requestList.items.add({
@@ -150,7 +150,7 @@ export default class ItemCreator extends React.Component<IItemCreatorProps, IIte
       MembersId: this.state.Members,
       VisitorsId: this.state.Visitors
     });
-    
+
     //Calling Azure function
     const client = await this.props.context.aadHttpClientFactory.getClient(this.props.ClientID);
     const bodyContent: string = JSON.stringify({
@@ -164,8 +164,8 @@ export default class ItemCreator extends React.Component<IItemCreatorProps, IIte
     };
     // Redirecting after save or cancel
     const results: any[] = await (await client.post(this.props.apiUrl, AadHttpClient.configurations.v1, httpClientOptions)).json();
-        if (this.props.redirectUrl !== '') {
-    //window.location.href = this.props.redirectUrl;
+    if (this.props.redirectUrl !== '') {
+      window.location.href = this.props.redirectUrl;
     }
   }
 }
