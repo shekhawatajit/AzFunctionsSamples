@@ -1,4 +1,3 @@
-using System;
 namespace SimplifiedDelegatedRER
 {
     public class AzureFunctionSettings
@@ -8,20 +7,7 @@ namespace SimplifiedDelegatedRER
         public string? ClientId { get; set; }
         public string? SecretName { get; set; }
         public string? KeyVaultName { get; set; }
-
-        #region OIP
-        public string? OIPHubSite { get; set; }
-        public Guid OIPRequestListId { get; set; }
-        public Guid OIPMailListId { get; set; }
-        public string? OIPProvisioningTemplateXmlFileUrl { get; set; }
-        #endregion
-
-        #region Relation
-        public string? RelationHubSite { get; set; }
-        public Guid RelationRequestListId { get; set; }
-        public Guid RelationMailListId { get; set; }
-        public string? RelationProvisioningTemplateXmlFileUrl { get; set; }
-        #endregion
+        public string? MailListTitle { get; set; }
 #nullable disable
     }
 }
