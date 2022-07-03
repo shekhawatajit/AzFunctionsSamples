@@ -9,6 +9,12 @@ declare interface IItemCreatorWebPartStrings {
   ClientIDFieldLabel: string;
   apiUrlFieldLabel: string;
   redirectUrlFieldLabel: string;
+  ProvisionTemplateFieldLabel: string;
+  SiteTypeLabel: string;
+  GroupWithTeams: string;
+  GroupWithTeamsLabel: string;
+  GroupWithoutTeams: string;
+  GroupWithoutTeamsLabel: string;
 }
 
 declare module 'ItemCreatorWebPartStrings' {

@@ -8,8 +8,11 @@ import { SPFI, spfi, SPFx } from "@pnp/sp";
 import "@pnp/sp/webs";
 import "@pnp/sp/lists";
 import "@pnp/sp/items";
+import "@pnp/sp/sites";
 import "@pnp/sp/site-users/web";
 import { IItemAddResult } from "@pnp/sp/items";
+import { v4 as uuidv4 } from 'uuid';
+import "@pnp/sp/site-groups/web";
 
 const verticalGapStackTokens: IStackTokens = {
   childrenGap: 10,
@@ -25,9 +28,10 @@ export default class ItemCreator extends React.Component<IItemCreatorProps, IIte
     this.state = {
       Title: "",
       Description: "",
-      Onwers: [],
-      Members: [],
-      Visitors: [],
+      OnwersIds: [],
+      MembersIds: [],
+      VisitorsIds: [],
+      OnwersSPNs: [],
       Submitted: false,
     };
   }
@@ -78,14 +82,14 @@ export default class ItemCreator extends React.Component<IItemCreatorProps, IIte
               </MessageBar>
             </StackItem>
           }
-          {(this.state.Onwers.length === 0) && this.state.Submitted &&
+          {(this.state.OnwersIds.length === 0) && this.state.Submitted &&
             <StackItem>
               <MessageBar messageBarType={MessageBarType.error} isMultiline={false}    >
                 Owners cannot be empty.
               </MessageBar>
             </StackItem>
           }
-          {(this.state.Members.length === 0) && this.state.Submitted &&
+          {(this.state.MembersIds.length === 0) && this.state.Submitted &&
             <StackItem>
               <MessageBar messageBarType={MessageBarType.error} isMultiline={false}    >
                 Members cannot be empty.
@@ -103,13 +107,15 @@ export default class ItemCreator extends React.Component<IItemCreatorProps, IIte
 
   private onOwnersChanged = async (e: any): Promise<void> => {
     let selusers: number[] = [];
+    let spns: string[] = [];
     if (e.detail && e.detail.length > 0) {
       e.detail.map(async user => {
         var Result = await this.sp.web.ensureUser(user.userPrincipalName);
         selusers.push(Result.data.Id);
+        spns.push(user.userPrincipalName);
       });
     }
-    this.setState({ Onwers: selusers });
+    this.setState({ OnwersIds: selusers });
   }
   private onMembersChanged = async (e: any): Promise<void> => {
     let selusers: number[] = [];
@@ -119,7 +125,7 @@ export default class ItemCreator extends React.Component<IItemCreatorProps, IIte
         selusers.push(Result.data.Id);
       });
     }
-    this.setState({ Members: selusers });
+    this.setState({ MembersIds: selusers });
   }
   private onVisitorsChanged = async (e: any): Promise<void> => {
     let selusers: number[] = [];
@@ -129,12 +135,12 @@ export default class ItemCreator extends React.Component<IItemCreatorProps, IIte
         selusers.push(Result.data.Id);
       });
     }
-    this.setState({ Visitors: selusers });
+    this.setState({ VisitorsIds: selusers });
   }
 
   private saveProjectRequest = async (): Promise<void> => {
     this.setState({ Submitted: true });
-    if (this.state.Title == '' || this.state.Description == '' || this.state.Onwers.length === 0 || this.state.Members.length === 0) {
+    if (this.state.Title == '' || this.state.Description == '' || this.state.OnwersIds.length === 0 || this.state.MembersIds.length === 0) {
       return;
     }
     //Loading List 
@@ -146,10 +152,27 @@ export default class ItemCreator extends React.Component<IItemCreatorProps, IIte
     const iar: IItemAddResult = await requestList.items.add({
       Title: this.state.Title,
       Description: this.state.Description,
-      OwnersId: this.state.Onwers,
-      MembersId: this.state.Members,
-      VisitorsId: this.state.Visitors
+      OwnersId: this.state.OnwersIds,
+      MembersId: this.state.MembersIds,
+      VisitorsId: this.state.VisitorsIds
     });
+    //creating Team Site
+    const regEx = /\s+/g
+    const newStr = this.state.Title.replace(regEx, "").substring(0, 10);
+    var UniueValue = newStr + uuidv4().split('-')[2];
+    const result = await this.sp.site.createModernTeamSite(
+      this.state.Title,
+      UniueValue,
+      false,
+      1033,
+      this.state.Description,
+      "",
+      this.state.OnwersSPNs,
+      this.props.context.pageContext.legacyPageContext.departmentId,
+      null
+    );
+
+    console.dir(result);
 
     //Calling Azure function
     const client = await this.props.context.aadHttpClientFactory.getClient(this.props.ClientID);
@@ -157,7 +180,10 @@ export default class ItemCreator extends React.Component<IItemCreatorProps, IIte
       'RequestListItemId': iar.data.Id,
       'RequestListId': requestListId.Id,
       'RequestSPSiteUrl': this.props.context.pageContext.web.absoluteUrl,
-      'RequestorId': iar.data.AuthorId
+      'RequestorId': iar.data.AuthorId,
+      'NewSiteUrl': result.SiteUrl,
+      'ProvisionTemplate': this.props.ProvisionTemplate,
+      'SiteType': this.props.SiteType
     });
     const httpClientOptions: IHttpClientOptions = {
       body: bodyContent,
