@@ -167,12 +167,12 @@ export default class ItemCreator extends React.Component<IItemCreatorProps, IIte
       1033,
       this.state.Description,
       "",
-      this.state.OnwersSPNs,
+      [this.props.context.pageContext.user.email],
       this.props.context.pageContext.legacyPageContext.departmentId,
       null
     );
 
-    console.dir(result);
+    var NewSiteUrl = this.props.context.pageContext.web.absoluteUrl.split("sites")[0] + "sites/" + UniueValue;
 
     //Calling Azure function
     const client = await this.props.context.aadHttpClientFactory.getClient(this.props.ClientID);
@@ -181,7 +181,7 @@ export default class ItemCreator extends React.Component<IItemCreatorProps, IIte
       'RequestListId': requestListId.Id,
       'RequestSPSiteUrl': this.props.context.pageContext.web.absoluteUrl,
       'RequestorId': iar.data.AuthorId,
-      'NewSiteUrl': result.SiteUrl,
+      'NewSiteUrl': NewSiteUrl,
       'ProvisionTemplate': this.props.ProvisionTemplate,
       'SiteType': this.props.SiteType
     });
