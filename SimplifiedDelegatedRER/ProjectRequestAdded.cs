@@ -61,6 +61,7 @@ namespace SimplifiedDelegatedRER
                     case "GroupWithTeams":
                         // Applying provising template
                         //System.Threading.Thread.Sleep(5000);
+                        // Provision first so that durnig this time Group and Teams will be ready
                         ut.ProvisionSite(newTeamsSiteContext, info, template, log);
                         // Creating Teams from SharePoint Team Site
                         //System.Threading.Thread.Sleep(5000);
@@ -72,6 +73,7 @@ namespace SimplifiedDelegatedRER
                     case "GroupWithoutTeams":
                         // Applying provising template
                         //System.Threading.Thread.Sleep(5000);
+                         // Provision first so that durnig this time Group and Teams will be ready
                         ut.ProvisionSite(newTeamsSiteContext, info, template, log);
                         //Adding members
                         //System.Threading.Thread.Sleep(5000);
