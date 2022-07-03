@@ -60,10 +60,10 @@ namespace SimplifiedDelegatedRER
                 {
                     case "GroupWithTeams":
                         // Applying provising template
-                        System.Threading.Thread.Sleep(5000);
+                        //System.Threading.Thread.Sleep(5000);
                         ut.ProvisionSite(newTeamsSiteContext, info, template, log);
                         // Creating Teams from SharePoint Team Site
-                        System.Threading.Thread.Sleep(5000);
+                        //System.Threading.Thread.Sleep(5000);
                         await ut.CreateTeamsFromSPSite(newTeamsSiteContext, log);
                         //Adding membersand owners to team
                         System.Threading.Thread.Sleep(5000);
@@ -71,10 +71,10 @@ namespace SimplifiedDelegatedRER
                         break;
                     case "GroupWithoutTeams":
                         // Applying provising template
-                        System.Threading.Thread.Sleep(5000);
+                        //System.Threading.Thread.Sleep(5000);
                         ut.ProvisionSite(newTeamsSiteContext, info, template, log);
                         //Adding members
-                        System.Threading.Thread.Sleep(5000);
+                        //System.Threading.Thread.Sleep(5000);
                         await ut.AddSiteMembers(newTeamsSiteContext, info, log);
                         break;
                     default:
