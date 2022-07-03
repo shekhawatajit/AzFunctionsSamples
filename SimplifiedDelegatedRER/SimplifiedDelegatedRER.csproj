@@ -15,9 +15,10 @@
         <PackageReference Include="Microsoft.Graph" Version="4.32.0" />
         <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.20.0" />
         <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.0.1" />
+        <PackageReference Include="PnP.Core" Version="1.7.0" />
         <PackageReference Include="PnP.Core.Admin" Version="1.7.0" />
-        <PackageReference Include="PnP.Core.Auth" Version="1.6.0" />
-        <PackageReference Include="PnP.Framework" Version="1.9.0" />
+        <PackageReference Include="PnP.Core.Auth" Version="1.7.0" />
+        <PackageReference Include="PnP.Framework" Version="1.10.0" />
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.20.0" />
   </ItemGroup>
   <ItemGroup>
