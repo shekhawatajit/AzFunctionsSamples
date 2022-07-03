@@ -7,12 +7,15 @@ export interface IItemCreatorProps {
   ClientID: string;
   apiUrl: string;
   redirectUrl: string;
+  ProvisionTemplate: string;
+  SiteType: string;
 }
 export interface IItemCreatorState {
   Title: string;
   Description: string;
-  Onwers: number[];
-  Members: number[];
-  Visitors: number[];
+  OnwersIds: number[];
+  OnwersSPNs: string[];
+  MembersIds: number[];
+  VisitorsIds: number[];
   Submitted: boolean;
 }

@@ -2,7 +2,7 @@ import * as React from 'react';
 import * as ReactDom from 'react-dom';
 import { Version } from '@microsoft/sp-core-library';
 import { Providers, SharePointProvider } from '@microsoft/mgt-spfx';
-import { IPropertyPaneConfiguration, PropertyPaneTextField } from '@microsoft/sp-property-pane';
+import { IPropertyPaneConfiguration, PropertyPaneTextField, PropertyPaneChoiceGroup, IPropertyPaneChoiceGroupOption } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
 import * as strings from 'ItemCreatorWebPartStrings';
@@ -15,6 +15,8 @@ export interface IItemCreatorWebPartProps {
   ClientID: string;
   apiUrl: string;
   redirectUrl: string;
+  ProvisionTemplate: string;
+  SiteType: string;
 }
 
 export default class ItemCreatorWebPart extends BaseClientSideWebPart<IItemCreatorWebPartProps> {
@@ -31,7 +33,9 @@ export default class ItemCreatorWebPart extends BaseClientSideWebPart<IItemCreat
         ListTitle: this.properties.ListTitle,
         ClientID: this.properties.ClientID,
         apiUrl: this.properties.apiUrl,
-        redirectUrl: this.properties.redirectUrl
+        redirectUrl: this.properties.redirectUrl,
+        ProvisionTemplate: this.properties.ProvisionTemplate,
+        SiteType: this.properties.SiteType,
       }
     );
 
@@ -71,7 +75,6 @@ export default class ItemCreatorWebPart extends BaseClientSideWebPart<IItemCreat
 
   }
 
-
   protected onDispose(): void {
     ReactDom.unmountComponentAtNode(this.domElement);
   }
@@ -94,7 +97,15 @@ export default class ItemCreatorWebPart extends BaseClientSideWebPart<IItemCreat
                 PropertyPaneTextField('ListTitle', { label: strings.ListTitleFieldLabel }),
                 PropertyPaneTextField('ClientID', { label: strings.ClientIDFieldLabel }),
                 PropertyPaneTextField('apiUrl', { label: strings.apiUrlFieldLabel }),
-                PropertyPaneTextField('redirectUrl', { label: strings.redirectUrlFieldLabel })
+                PropertyPaneTextField('redirectUrl', { label: strings.redirectUrlFieldLabel }),
+                PropertyPaneTextField('ProvisionTemplate', { label: strings.ProvisionTemplateFieldLabel }),
+                PropertyPaneChoiceGroup('SiteType', {
+                  label: strings.SiteTypeLabel,
+                  options: [
+                    { key: strings.GroupWithTeams, text: strings.GroupWithTeamsLabel },
+                    { key: strings.GroupWithoutTeams, text: strings.GroupWithoutTeamsLabel }
+                  ]
+                })
               ]
             }
           ]
