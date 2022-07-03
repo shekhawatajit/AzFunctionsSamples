@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using PnP.Core.Model.Security;
 
@@ -7,8 +8,8 @@ namespace SimplifiedDelegatedRER
     {
         public int RequestListItemId { get; set; }
         public int RequestorId { get; set; }
+        public Guid RequestListId { get; set; }
 #nullable enable
-        public string? RequestListTitle { get; set; }
         public string? RequestSPSiteUrl { get; set; }
         public string? ProvisionTemplate { get; set; }
         public List<ISharePointUser>? Owners { get; set; }
@@ -18,7 +19,7 @@ namespace SimplifiedDelegatedRER
         public string? ProjectDescription { get; set; }
         public string? ProjectRequestor { get; set; }
         public string? NewSiteUrl { get; set; }
-        public string? SiteType{ get; set; }
+        public string? SiteType { get; set; }
 #nullable disable
     }
 }

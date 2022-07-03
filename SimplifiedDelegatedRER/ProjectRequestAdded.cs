@@ -31,6 +31,9 @@ namespace SimplifiedDelegatedRER
             //Processing request body
             ProjectRequestInfo info = JsonSerializer.Deserialize<ProjectRequestInfo>(request.Content.ReadAsStringAsync().Result);
 
+            var jsonString = System.Text.Json.JsonSerializer.Serialize(info);
+            log.LogInformation(jsonString);
+
             //Creating PnP.Core context using clientid and client secret with user imperssionation
             var secretKV = ut.LoadSecret(_functionSettings.KeyVaultName, _functionSettings.SecretName);
             var clientSecret = new SecureString();
@@ -40,13 +43,14 @@ namespace SimplifiedDelegatedRER
             //Working on hub site for reading required informaiton
             using (PnPContext contextPrimaryHub = await _pnpContextFactory.CreateAsync(new System.Uri(info.RequestSPSiteUrl), onBehalfAuthProvider))
             {
+
                 //Reading Project request details from SharePoint
                 info = await ut.ReadRequestFromList(contextPrimaryHub, info, log);
 
                 //Reading ProvisionTemplate
-                template = await ut.ReadProvisionTemplte(contextPrimaryHub, log, info.ProvisionTemplate);
+                template = await ut.ReadProvisionTemplte(contextPrimaryHub, info.ProvisionTemplate, log);
 
-                ut.UpdateSpList(_functionSettings.MailListTitle, info.ProjectTitle, info.ProjectDescription, info.ProjectRequestor, info.NewSiteUrl, contextPrimaryHub);
+                ut.UpdateSpList(contextPrimaryHub, info, _functionSettings, log);
             }
 
             // Working on New Teams Site
@@ -55,17 +59,22 @@ namespace SimplifiedDelegatedRER
                 switch (info.SiteType)
                 {
                     case "GroupWithTeams":
-                        // Creating Teams from SharePoint Team Site
-                        await ut.CreateTeamsFromSPSite(newTeamsSiteContext, log);
                         // Applying provising template
-                        ut.ProvisionSite(newTeamsSiteContext, log, template, info);
+                        System.Threading.Thread.Sleep(5000);
+                        ut.ProvisionSite(newTeamsSiteContext, info, template, log);
+                        // Creating Teams from SharePoint Team Site
+                        System.Threading.Thread.Sleep(5000);
+                        await ut.CreateTeamsFromSPSite(newTeamsSiteContext, log);
                         //Adding membersand owners to team
+                        System.Threading.Thread.Sleep(5000);
                         await ut.AddTeamMembers(newTeamsSiteContext, info, log);
                         break;
                     case "GroupWithoutTeams":
                         // Applying provising template
-                        ut.ProvisionSite(newTeamsSiteContext, log, template, info);
+                        System.Threading.Thread.Sleep(5000);
+                        ut.ProvisionSite(newTeamsSiteContext, info, template, log);
                         //Adding members
+                        System.Threading.Thread.Sleep(5000);
                         await ut.AddSiteMembers(newTeamsSiteContext, info, log);
                         break;
                     default:

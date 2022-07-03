@@ -28,9 +28,10 @@ namespace SimplifiedDelegatedRER
             SecretClient client = new SecretClient(new Uri(KeyVaultUrl), new DefaultAzureCredential());
             return client.GetSecret(SecretName).Value.Value;
         }
-        public void UpdateSpList(string MailListTitle, string ProjectTitle, string ProjectDescription, string ProjectRequestor, string TeamSiteUrl, PnPContext siteContext)
+        public void UpdateSpList(PnPContext siteContext, ProjectRequestInfo info, AzureFunctionSettings settings, ILogger log)
         {
-            IList mailList = siteContext.Web.Lists.GetByTitle(MailListTitle, p => p.Title,
+            log.LogInformation("UpdateSpList Started");
+            IList mailList = siteContext.Web.Lists.GetByTitle(settings.MailListTitle, p => p.Title,
                                                                     p => p.Fields.QueryProperties(p => p.InternalName,
                                                                                                   p => p.FieldTypeKind,
                                                                                                   p => p.TypeAsString,
@@ -41,13 +42,14 @@ namespace SimplifiedDelegatedRER
 
             Dictionary<string, object> values = new Dictionary<string, object>
             {
-                { "Title", $"Project Request {ProjectTitle}" },
-                { "Status", $"Request Accespted, Teams created. SharePoint Site Url is {TeamSiteUrl}"}
+                { "Title", $"Project Request {info.ProjectTitle}" },
+                { "Status", $"Request Accespted, Teams created. SharePoint Site Url is {info.NewSiteUrl}"}
             };
-            var Receiver = siteContext.Web.EnsureUser(ProjectRequestor);
+            var Receiver = siteContext.Web.EnsureUser(info.ProjectRequestor);
             values.Add("Receiver", userfield.NewFieldUserValue(Receiver));
             var addedItem = mailList.Items.Add(values);
             addedItem.Update();
+            log.LogInformation("UpdateSpList Complete");
         }
         public async Task<ProjectRequestInfo> ReadRequestFromList(PnPContext contextPrimaryHub, ProjectRequestInfo info, ILogger log)
         {
@@ -57,7 +59,7 @@ namespace SimplifiedDelegatedRER
                 p => p.HubSiteId,
                 p => p.IsHubSite);
 
-            IList list = contextPrimaryHub.Web.Lists.GetByTitle(info.RequestListTitle);
+            IList list = contextPrimaryHub.Web.Lists.GetById(info.RequestListId);
             IListItem requestDetails = list.Items.GetById(info.RequestListItemId,
                     li => li.Title,
                     li => li.All);
@@ -138,7 +140,7 @@ namespace SimplifiedDelegatedRER
             await graphClient.Groups[site.GroupId.ToString()].Team.Request().PutAsync(team);
             log.LogInformation("CreateTeamsFromSPSite Complete");
         }
-        public async Task<ProvisioningTemplate> ReadProvisionTemplte(PnPContext contextPrimaryHub, ILogger log, string TemplatePath)
+        public async Task<ProvisioningTemplate> ReadProvisionTemplte(PnPContext contextPrimaryHub, string TemplatePath, ILogger log)
         {
             log.LogInformation("ReadProvisionTemplte Started");
             string templateUrl = string.Format("{0}{1}", contextPrimaryHub.Uri.PathAndQuery, TemplatePath);
@@ -147,10 +149,10 @@ namespace SimplifiedDelegatedRER
             Stream downloadedContentStream = await templateDocument.GetContentAsync();
             var provisioningTemplate = XMLPnPSchemaFormatter.LatestFormatter.ToProvisioningTemplate(downloadedContentStream);
             log.LogInformation($"Template ID :{provisioningTemplate.Id}");
-            log.LogInformation("ReadProvisionTemplte Started");
+            log.LogInformation("ReadProvisionTemplte Completed");
             return provisioningTemplate;
         }
-        public void ProvisionSite(PnPContext newTeamsSiteContext, ILogger log, ProvisioningTemplate template, ProjectRequestInfo info)
+        public void ProvisionSite(PnPContext newTeamsSiteContext, ProjectRequestInfo info, ProvisioningTemplate template, ILogger log)
         {
             log.LogInformation("ProvisionSite Started");
 
@@ -239,7 +241,7 @@ namespace SimplifiedDelegatedRER
         {
             log.LogInformation("AddSiteMembers Started");
             await newSiteContext.Web.LoadAsync(p => p.AssociatedOwnerGroup, p => p.AssociatedMemberGroup, p => p.AssociatedVisitorGroup);
-           
+
             if (info.Owners != null)
             {
                 foreach (var user in info.Owners)
