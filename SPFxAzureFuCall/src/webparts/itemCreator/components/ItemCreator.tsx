@@ -159,20 +159,37 @@ export default class ItemCreator extends React.Component<IItemCreatorProps, IIte
     //creating Team Site
     const regEx = /\s+/g
     const newStr = this.state.Title.replace(regEx, "").substring(0, 10);
-    var UniueValue = newStr + uuidv4().split('-')[2];
-    const result = await this.sp.site.createModernTeamSite(
-      this.state.Title,
-      UniueValue,
-      false,
-      1033,
-      this.state.Description,
-      "",
-      [this.props.context.pageContext.user.email],
-      this.props.context.pageContext.legacyPageContext.departmentId,
-      null
-    );
-
-    var NewSiteUrl = this.props.context.pageContext.web.absoluteUrl.split("sites")[0] + "sites/" + UniueValue;
+    var NewSiteUrl = '';
+    if (this.props.SiteType === 'GroupWithTeams') {
+      var UniueValue = newStr + uuidv4().split('-')[2];
+      NewSiteUrl = this.props.context.pageContext.web.absoluteUrl.split("sites")[0] + "sites/" + UniueValue;
+      const result = await this.sp.site.createModernTeamSite(
+        this.state.Title, //Title
+        UniueValue,   //alias
+        false, //isPublic
+        1033,   //Language ID
+        this.state.Description, //Description
+        null,   //classification
+        [this.props.context.pageContext.user.email], //Owners
+        this.props.context.pageContext.legacyPageContext.departmentId, //hubSiteId
+        null //siteDesignId
+      );
+    }
+    if (this.props.SiteType === 'GroupWithoutTeams') {
+      var UniueValue = uuidv4().split('-')[2];
+      NewSiteUrl = this.props.context.pageContext.web.absoluteUrl.split("sites")[0] + "sites/" + UniueValue;
+      const result = await this.sp.site.createCommunicationSite(
+        this.state.Title, //Title
+        1033,             //language id
+        true,             //shareByEmailEnabled
+        NewSiteUrl,     //Url
+        this.state.Description, //Description
+        null, //classification
+        null, //siteDesignId
+        this.props.context.pageContext.legacyPageContext.departmentId,  //hubSiteId
+        this.props.context.pageContext.user.email //Owner
+      );
+    }
 
     //Calling Azure function
     const client = await this.props.context.aadHttpClientFactory.getClient(this.props.ClientID);
