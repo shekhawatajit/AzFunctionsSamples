@@ -2,7 +2,7 @@ import * as React from 'react';
 import styles from './ItemCreator.module.scss';
 import { IItemCreatorProps, IItemCreatorState } from './IItemCreatorProps';
 import { PeoplePicker } from '@microsoft/mgt-react/dist/es6/spfx';
-import { Label, TextField, MessageBar, MessageBarType, Stack, IStackTokens, StackItem, DefaultButton, PrimaryButton } from 'office-ui-fabric-react';
+import { Label, TextField, MessageBar, MessageBarType, Stack, IStackTokens, StackItem, DefaultButton, PrimaryButton, Spinner, SpinnerSize } from 'office-ui-fabric-react';
 import { AadHttpClient, IHttpClientOptions } from '@microsoft/sp-http';
 import { SPFI, spfi, SPFx } from "@pnp/sp";
 import "@pnp/sp/webs";
@@ -21,7 +21,7 @@ const verticalGapStackTokens: IStackTokens = {
 const stackTokens: IStackTokens = { childrenGap: 40 };
 
 export default class ItemCreator extends React.Component<IItemCreatorProps, IItemCreatorState> {
-  private sp: SPFI;
+  private _sp: SPFI;
   constructor(props: IItemCreatorProps, state: IItemCreatorState) {
     super(props);
     // set initial state
@@ -33,13 +33,15 @@ export default class ItemCreator extends React.Component<IItemCreatorProps, IIte
       VisitorsIds: [],
       OnwersSPNs: [],
       Submitted: false,
+      InProgess: false,
+      ErrorMessage: ''
     };
   }
 
   //this.setState({ DataItems: results });
 
   public render(): React.ReactElement<IItemCreatorProps> {
-    this.sp = spfi().using(SPFx({ pageContext: this.props.context.pageContext }));
+    this._sp = spfi().using(SPFx({ pageContext: this.props.context.pageContext }));
     const {
       context,
       hasTeamsContext
@@ -58,15 +60,15 @@ export default class ItemCreator extends React.Component<IItemCreatorProps, IIte
           </StackItem>
           <StackItem>
             <Label htmlFor="OwnersPicker">Owners</Label>
-            <PeoplePicker id='OwnersPicker' selectionChanged={this.onOwnersChanged} placeholder='Select Owners'></PeoplePicker>
+            <PeoplePicker id='OwnersPicker' selectionChanged={this._onOwnersChanged} placeholder='Select Owners'></PeoplePicker>
           </StackItem>
           <StackItem>
             <Label htmlFor="MembersPicker">Members</Label>
-            <PeoplePicker id='MembersPicker' selectionChanged={this.onMembersChanged} placeholder='Select Members'></PeoplePicker>
+            <PeoplePicker id='MembersPicker' selectionChanged={this._onMembersChanged} placeholder='Select Members'></PeoplePicker>
           </StackItem>
           <StackItem>
             <Label htmlFor="VisitorsPicker">Visitors</Label>
-            <PeoplePicker id='VisitorsPicker' selectionChanged={this.onVisitorsChanged} placeholder='Select Visitors'></PeoplePicker>
+            <PeoplePicker id='VisitorsPicker' selectionChanged={this._onVisitorsChanged} placeholder='Select Visitors'></PeoplePicker>
           </StackItem>
           {(this.state.Title === '') && this.state.Submitted &&
             <StackItem>
@@ -96,118 +98,147 @@ export default class ItemCreator extends React.Component<IItemCreatorProps, IIte
               </MessageBar>
             </StackItem>
           }
+          {this.state.InProgess &&
+            <StackItem>
+              <Label>Please wait, we are working on your request. You will be redirecting after success.</Label>
+              <Spinner size={SpinnerSize.medium} />
+            </StackItem>
+          }
+          {this.state.ErrorMessage !== '' &&
+            <StackItem>
+              <MessageBar messageBarType={MessageBarType.error} isMultiline={true}    >
+                {this.state.ErrorMessage}
+              </MessageBar>
+            </StackItem>
+          }
           <Stack horizontal tokens={stackTokens}>
-            <PrimaryButton text="Save" onClick={() => this.saveProjectRequest()} allowDisabledFocus />
-            <DefaultButton text="Cancel" onClick={() => console.log('Cancel')} allowDisabledFocus />
+            <PrimaryButton text="Save" onClick={() => this._saveProjectRequest()} allowDisabledFocus disabled={this.state.InProgess} />
+            <DefaultButton text="Cancel" onClick={() => this._redirectPage()} allowDisabledFocus disabled={this.state.InProgess} />
           </Stack>
         </Stack>
       </section>
     );
   }
 
-  private onOwnersChanged = async (e: any): Promise<void> => {
+  private _onOwnersChanged = async (e: any): Promise<void> => {
     let selusers: number[] = [];
-    let spns: string[] = [];
     if (e.detail && e.detail.length > 0) {
       e.detail.map(async user => {
-        var Result = await this.sp.web.ensureUser(user.userPrincipalName);
+        var Result = await this._sp.web.ensureUser(user.userPrincipalName);
         selusers.push(Result.data.Id);
-        spns.push(user.userPrincipalName);
       });
     }
     this.setState({ OnwersIds: selusers });
   }
-  private onMembersChanged = async (e: any): Promise<void> => {
+  private _onMembersChanged = async (e: any): Promise<void> => {
     let selusers: number[] = [];
     if (e.detail && e.detail.length > 0) {
       e.detail.map(async user => {
-        var Result = await this.sp.web.ensureUser(user.userPrincipalName);
+        var Result = await this._sp.web.ensureUser(user.userPrincipalName);
         selusers.push(Result.data.Id);
       });
     }
     this.setState({ MembersIds: selusers });
   }
-  private onVisitorsChanged = async (e: any): Promise<void> => {
+  private _onVisitorsChanged = async (e: any): Promise<void> => {
     let selusers: number[] = [];
     if (e.detail && e.detail.length > 0) {
       e.detail.map(async user => {
-        var Result = await this.sp.web.ensureUser(user.userPrincipalName);
+        var Result = await this._sp.web.ensureUser(user.userPrincipalName);
         selusers.push(Result.data.Id);
       });
     }
     this.setState({ VisitorsIds: selusers });
   }
 
-  private saveProjectRequest = async (): Promise<void> => {
-    this.setState({ Submitted: true });
-    if (this.state.Title == '' || this.state.Description == '' || this.state.OnwersIds.length === 0 || this.state.MembersIds.length === 0) {
-      return;
-    }
-    //Loading List 
-    const requestList = await this.sp.web.lists.getByTitle(this.props.ListTitle);
-    const requestListId = await requestList.select("Id")();
+  private _saveProjectRequest = async (): Promise<void> => {
+    try {
+      this.setState({ ErrorMessage: '' });
+      this.setState({ Submitted: true });
+      if (this.state.Title == '' || this.state.Description == '' || this.state.OnwersIds.length === 0 || this.state.MembersIds.length === 0) {
+        return;
+      }
+      this.setState({ InProgess: true });
+      //Loading List 
+      const requestList = await this._sp.web.lists.getByTitle(this.props.ListTitle);
+      const requestListId = await requestList.select("Id")();
 
-    // add an item to the list
-    // *** WARNING ***Append 'Id' on User Field internal Name otherwise api will not work
-    const iar: IItemAddResult = await requestList.items.add({
-      Title: this.state.Title,
-      Description: this.state.Description,
-      OwnersId: this.state.OnwersIds,
-      MembersId: this.state.MembersIds,
-      VisitorsId: this.state.VisitorsIds
-    });
-    //creating Team Site
-    const regEx = /\s+/g
-    const newStr = this.state.Title.replace(regEx, "").substring(0, 10);
-    var NewSiteUrl = '';
-    if (this.props.SiteType === 'GroupWithTeams') {
-      var UniueValue = newStr + uuidv4().split('-')[2];
-      NewSiteUrl = this.props.context.pageContext.web.absoluteUrl.split("sites")[0] + "sites/" + UniueValue;
-      const result = await this.sp.site.createModernTeamSite(
-        this.state.Title, //Title
-        UniueValue,   //alias
-        false, //isPublic
-        1033,   //Language ID
-        this.state.Description, //Description
-        null,   //classification
-        [this.props.context.pageContext.user.email], //Owners
-        this.props.context.pageContext.legacyPageContext.departmentId, //hubSiteId
-        null //siteDesignId
-      );
-    }
-    if (this.props.SiteType === 'GroupWithoutTeams') {
-      var UniueValue = uuidv4().split('-')[2];
-      NewSiteUrl = this.props.context.pageContext.web.absoluteUrl.split("sites")[0] + "sites/" + UniueValue;
-      const result = await this.sp.site.createCommunicationSite(
-        this.state.Title, //Title
-        1033,             //language id
-        true,             //shareByEmailEnabled
-        NewSiteUrl,     //Url
-        this.state.Description, //Description
-        null, //classification
-        null, //siteDesignId
-        this.props.context.pageContext.legacyPageContext.departmentId,  //hubSiteId
-        this.props.context.pageContext.user.email //Owner
-      );
+      // add an item to the list
+      // *** WARNING ***Append 'Id' on User Field internal Name otherwise api will not work
+      const iar: IItemAddResult = await requestList.items.add({
+        Title: this.state.Title,
+        Description: this.state.Description,
+        OwnersId: this.state.OnwersIds,
+        MembersId: this.state.MembersIds,
+        VisitorsId: this.state.VisitorsIds
+      });
+      //creating Team Site
+      const regEx = /\s+/g
+      const newStr = this.state.Title.replace(regEx, "").substring(0, 10);
+      var NewSiteUrl = '';
+      if (this.props.SiteType === 'GroupWithTeams') {
+        var UniueValue = newStr + uuidv4().split('-')[2];
+        NewSiteUrl = this.props.context.pageContext.web.absoluteUrl.split("sites")[0] + "sites/" + UniueValue;
+        const result = await this._sp.site.createModernTeamSite(
+          this.state.Title, //Title
+          UniueValue,   //alias
+          false, //isPublic
+          1033,   //Language ID
+          this.state.Description, //Description
+          null,   //classification
+          [this.props.context.pageContext.user.email], //Owners
+          this.props.context.pageContext.legacyPageContext.departmentId, //hubSiteId
+          null //siteDesignId
+        );
+      }
+      if (this.props.SiteType === 'GroupWithoutTeams') {
+        var UniueValue = uuidv4().split('-')[2];
+        NewSiteUrl = this.props.context.pageContext.web.absoluteUrl.split("sites")[0] + "sites/" + UniueValue;
+        const result = await this._sp.site.createCommunicationSite(
+          this.state.Title, //Title
+          1033,             //language id
+          true,             //shareByEmailEnabled
+          NewSiteUrl,     //Url
+          this.state.Description, //Description
+          null, //classification
+          null, //siteDesignId
+          this.props.context.pageContext.legacyPageContext.departmentId,  //hubSiteId
+          this.props.context.pageContext.user.email //Owner
+        );
+      }
+
+      //Calling Azure function
+      const client = await this.props.context.aadHttpClientFactory.getClient(this.props.ClientID);
+      const bodyContent: string = JSON.stringify({
+        'RequestListItemId': iar.data.Id,
+        'RequestListId': requestListId.Id,
+        'RequestSPSiteUrl': this.props.context.pageContext.web.absoluteUrl,
+        'RequestorId': iar.data.AuthorId,
+        'NewSiteUrl': NewSiteUrl,
+        'ProvisionTemplate': this.props.ProvisionTemplate,
+        'SiteType': this.props.SiteType
+      });
+      const httpClientOptions: IHttpClientOptions = {
+        body: bodyContent,
+      };
+      await (await client.post(this.props.apiUrl, AadHttpClient.configurations.v1, httpClientOptions));
+
+      // Redirecting after save or cancel
+      this._redirectPage();
     }
 
-    //Calling Azure function
-    const client = await this.props.context.aadHttpClientFactory.getClient(this.props.ClientID);
-    const bodyContent: string = JSON.stringify({
-      'RequestListItemId': iar.data.Id,
-      'RequestListId': requestListId.Id,
-      'RequestSPSiteUrl': this.props.context.pageContext.web.absoluteUrl,
-      'RequestorId': iar.data.AuthorId,
-      'NewSiteUrl': NewSiteUrl,
-      'ProvisionTemplate': this.props.ProvisionTemplate,
-      'SiteType': this.props.SiteType
-    });
-    const httpClientOptions: IHttpClientOptions = {
-      body: bodyContent,
-    };
+    catch (Error) {
+      this.setState({ Submitted: true });
+      this.setState({ InProgess: false });
+      this.setState({ ErrorMessage: Error.message });
+    }
+  }
+  private _redirectPage(): void {
     // Redirecting after save or cancel
-    await (await client.post(this.props.apiUrl, AadHttpClient.configurations.v1, httpClientOptions));
-    if (this.props.redirectUrl !== '') {
+    if (this.props.redirectUrl === '' || this.props.redirectUrl === '#') {
+      window.location.reload();
+    }
+    else {
       window.location.href = this.props.redirectUrl;
     }
   }

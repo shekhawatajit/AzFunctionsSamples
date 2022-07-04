@@ -18,4 +18,6 @@ export interface IItemCreatorState {
   MembersIds: number[];
   VisitorsIds: number[];
   Submitted: boolean;
+  InProgess: boolean;
+  ErrorMessage: string;
 }

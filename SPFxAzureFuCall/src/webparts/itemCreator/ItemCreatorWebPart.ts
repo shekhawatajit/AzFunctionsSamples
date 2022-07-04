@@ -2,13 +2,12 @@ import * as React from 'react';
 import * as ReactDom from 'react-dom';
 import { Version } from '@microsoft/sp-core-library';
 import { Providers, SharePointProvider } from '@microsoft/mgt-spfx';
-import { IPropertyPaneConfiguration, PropertyPaneTextField, PropertyPaneChoiceGroup, IPropertyPaneChoiceGroupOption } from '@microsoft/sp-property-pane';
+import { IPropertyPaneConfiguration, PropertyPaneTextField, PropertyPaneChoiceGroup } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
 import * as strings from 'ItemCreatorWebPartStrings';
 import ItemCreator from './components/ItemCreator';
 import { IItemCreatorProps } from './components/IItemCreatorProps';
-
 
 export interface IItemCreatorWebPartProps {
   ListTitle: string;
