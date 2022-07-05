@@ -15,7 +15,7 @@ namespace SimplifiedDelegatedRER
     public class ProjectRequestAdded
     {
         private readonly AzureFunctionSettings _functionSettings;
-        private ProjectRequestInfo _info = new ProjectRequestInfo();
+        //private ProjectRequestInfo _info = new ProjectRequestInfo();
         private readonly IPnPContextFactory _pnpContextFactory;
         private Utilities ut = new Utilities();
         public ProjectRequestAdded(AzureFunctionSettings azureFunctionSettings, IPnPContextFactory pnpContextFactory)
@@ -28,18 +28,20 @@ namespace SimplifiedDelegatedRER
         public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "ProjectRequestAdded")] HttpRequestMessage request, ILogger log)
         {
             log.LogInformation("Item Added HTTP trigger function processed a request.");
+            //Private variables
+            ProvisioningTemplate template;
             //Processing request body
             ProjectRequestInfo info = JsonSerializer.Deserialize<ProjectRequestInfo>(request.Content.ReadAsStringAsync().Result);
 
-            var jsonString = System.Text.Json.JsonSerializer.Serialize(info);
-            log.LogInformation(jsonString);
+            //var jsonString = System.Text.Json.JsonSerializer.Serialize(info);
+            //log.LogInformation(jsonString);
 
             //Creating PnP.Core context using clientid and client secret with user imperssionation
             var secretKV = ut.LoadSecret(_functionSettings.KeyVaultName, _functionSettings.SecretName);
             var clientSecret = new SecureString();
             foreach (char c in secretKV) clientSecret.AppendChar(c);
             var onBehalfAuthProvider = new OnBehalfOfAuthenticationProvider(_functionSettings.ClientId, _functionSettings.TenantId, clientSecret, () => request.Headers.Authorization.Parameter);
-            ProvisioningTemplate template;
+            
             //Working on hub site for reading required informaiton
             using (PnPContext contextPrimaryHub = await _pnpContextFactory.CreateAsync(new System.Uri(info.RequestSPSiteUrl), onBehalfAuthProvider))
             {
@@ -50,6 +52,7 @@ namespace SimplifiedDelegatedRER
                 //Reading ProvisionTemplate
                 template = await ut.ReadProvisionTemplte(contextPrimaryHub, info.ProvisionTemplate, log);
 
+                //Updating List for sending email.
                 ut.UpdateSpList(contextPrimaryHub, info, _functionSettings, log);
             }
 
@@ -67,7 +70,7 @@ namespace SimplifiedDelegatedRER
                         //System.Threading.Thread.Sleep(5000);
                         await ut.CreateTeamsFromSPSite(newTeamsSiteContext, log);
                         //Adding membersand owners to team
-                        System.Threading.Thread.Sleep(5000);
+                        //System.Threading.Thread.Sleep(5000);
                         await ut.AddTeamMembers(newTeamsSiteContext, info, log);
                         break;
                     case "GroupWithoutTeams":
@@ -84,6 +87,7 @@ namespace SimplifiedDelegatedRER
                         break;
                 }
             }
+            
             return new OkObjectResult("OK");
         }
     }

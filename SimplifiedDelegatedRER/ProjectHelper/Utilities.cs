@@ -113,7 +113,7 @@ namespace SimplifiedDelegatedRER
         {
             log.LogInformation("CreateTeamsFromSPSite Started");
             var site = await newTeamsSiteContext.Site.GetAsync(p => p.GroupId);
-            Console.WriteLine($"Group ID is: {site.GroupId.ToString()}");
+            log.LogInformation($"Group ID is: {site.GroupId.ToString()}");
             //Creating Graph Client
             var graphClient = new GraphServiceClient(new DelegateAuthenticationProvider((requestMessage) =>
             {
@@ -155,7 +155,7 @@ namespace SimplifiedDelegatedRER
         public void ProvisionSite(PnPContext newTeamsSiteContext, ProjectRequestInfo info, ProvisioningTemplate template, ILogger log)
         {
             log.LogInformation("ProvisionSite Started");
-
+            //Provisining is only possible using CSOM context so creating it.
             using (ClientContext csomContext = PnPCoreSdk.Instance.GetClientContext(newTeamsSiteContext))
             {
                 // Use CSOM to load the web title
@@ -167,7 +167,7 @@ namespace SimplifiedDelegatedRER
                 {
                     ProgressDelegate = delegate (String message, Int32 progress, Int32 total)
                     {
-                        Console.WriteLine(String.Format("{0:00}/{1:00} - {2}", progress, total, message));
+                        log.LogInformation(String.Format("{0:00}/{1:00} - {2}", progress, total, message));
                     },
                     IgnoreDuplicateDataRowErrors = true
                 };
@@ -181,7 +181,7 @@ namespace SimplifiedDelegatedRER
 
             var site = await newTeamsSiteContext.Site.GetAsync(p => p.GroupId);
             await newTeamsSiteContext.Web.LoadAsync(p => p.AssociatedVisitorGroup);
-            Console.WriteLine($"Group ID is: {site.GroupId.ToString()}");
+            log.LogInformation($"Group ID is: {site.GroupId.ToString()}");
             //Creating Graph Client
             var graphClient = new GraphServiceClient(new DelegateAuthenticationProvider((requestMessage) =>
             {
