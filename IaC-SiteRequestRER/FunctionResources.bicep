@@ -127,11 +127,11 @@ resource functionalAppSettings 'Microsoft.Web/sites/config@2021-03-01' = {
     WEBSITE_LOAD_USER_PROFILE: 1
     
     CertificateName: 'oipdevelopment'
-    ClientId: '3764eb06-7e9d-408b-83e3-2d1982ac5707'
+    ClientId: '00000000-0000-0000-0000-000000000000'
     HubSite: HubSite
     KeyVaultName: 'oipkv'
     MailListId: MailListId
-    TenantId: '51575b39-28de-4120-94c6-af4c743f70f1'
+    TenantId: '00000000-0000-0000-0000-000000000000'
     RequestListId: RequestListId
     Step1QueueName: step1queue.name
     ProvisioningTemplateXmlFileUrl:'https://onrocks.sharepoint.com/sites/ExRelationHubSite/SiteAssets/SiteTemplate.xml'
