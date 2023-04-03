@@ -1,9 +1,7 @@
 name: Generate and save SSH key
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   generate-ssh-key:
